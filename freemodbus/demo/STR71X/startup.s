@@ -151,7 +151,7 @@ _vector_copy:
      
     /* set RCLK to 16 * CLK2 / 1 = 32Mhz    
      * (0x0071 = FREEN=1, FREF_RANGE=1, MX1:0=11b, DX2:0=000b) */
-    ldr r1, =0x0071        
+    ldr r1, =0x00F0        
     str r1, [r0, #0x18]
 
     /* (0x8009 = DIV2=1, CK2_16=1, CKU_CKSEL=1) */
@@ -163,8 +163,8 @@ _vector_copy:
     str r1, [r0, #0x40]
 
     /* pclk1 = rclk/2 and pclk2 = rclk/2 = 16Mhz 
-     * (0x0022 = FACT2_9:8=10b, FACT1_1:0=10b) */
-    ldr r1, =0x0022
+     * (0x0101 = FACT2_9:8=01b, FACT1_1:0=01b) */
+    ldr r1, =0x0101
     str r1, [r0, #0x44]
 
     /* Jump to the default C runtime startup code. */
