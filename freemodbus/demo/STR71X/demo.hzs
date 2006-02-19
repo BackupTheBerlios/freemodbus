@@ -1,0 +1,57 @@
+<!DOCTYPE CrossStudio_for_ARM_Session_File>
+<session>
+ <Breakpoints/>
+ <ExecutionCountWindow/>
+ <Memory1>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" addressSpace="" />
+ </Memory1>
+ <Memory2>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" addressSpace="" />
+ </Memory2>
+ <Memory3>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" addressSpace="" />
+ </Memory3>
+ <Memory4>
+  <MemoryWindow autoEvaluate="0" addressText="" numColumns="8" sizeText="" dataSize="1" radix="16" addressSpace="" />
+ </Memory4>
+ <Project>
+  <ProjectSessionItem path="demo" name="unnamed" />
+  <ProjectSessionItem path="demo;demo" name="unnamed" />
+  <ProjectSessionItem path="demo;demo;Demo" name="unnamed" />
+  <ProjectSessionItem path="demo;demo;Modbus" name="unnamed" />
+  <ProjectSessionItem path="demo;demo;Modbus;RTU" name="unnamed" />
+  <ProjectSessionItem path="demo;demo;Modbus Port" name="unnamed" />
+ </Project>
+ <Register1>
+  <RegisterWindow unsignedDisplays="" asciiDisplays="" octalDisplays="" visibleGroups="" decimalDisplays="" binaryDisplays="" />
+ </Register1>
+ <Register2>
+  <RegisterWindow unsignedDisplays="" asciiDisplays="" octalDisplays="" visibleGroups="" decimalDisplays="" binaryDisplays="" />
+ </Register2>
+ <Register3>
+  <RegisterWindow unsignedDisplays="" asciiDisplays="" octalDisplays="" visibleGroups="" decimalDisplays="" binaryDisplays="" />
+ </Register3>
+ <Register4>
+  <RegisterWindow unsignedDisplays="" asciiDisplays="" octalDisplays="" visibleGroups="" decimalDisplays="" binaryDisplays="" />
+ </Register4>
+ <SourceNavigatorWindow/>
+ <TraceWindow>
+  <Trace wrap="Yes" type="1" enabled="Yes" />
+ </TraceWindow>
+ <Watch1>
+  <Watches active="0" />
+ </Watch1>
+ <Watch2>
+  <Watches active="1" />
+ </Watch2>
+ <Watch3>
+  <Watches active="0" />
+ </Watch3>
+ <Watch4>
+  <Watches active="0" />
+ </Watch4>
+ <Files>
+  <SessionOpenFile useTextEdit="1" useBinaryEdit="0" x="0" debugPath="Z:\home\wolti\devel\privat\arm\modbus\demo\STR71X\simple.c" y="55" useHTMLEdit="0" path="Z:\home\wolti\devel\privat\arm\modbus\demo\STR71X\simple.c" left="0" selected="0" name="unnamed" top="55" />
+ </Files>
+ <ARMCrossStudioWindow activeProject="demo" ignoreExceptions="" autoConnectTarget="/Macraigor Wiggler (20 Pin)" debugSearchFileMap="" fileDialogInitialDirectory="Z:\home\wolti\devel\privat\arm\modbus\demo\STR71X" fileDialogDefaultFilter="*" debugSearchPath="" buildConfiguration="ARM RAM Debug" />
+</session>

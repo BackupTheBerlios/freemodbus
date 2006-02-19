@@ -1,0 +1,178 @@
+ /*
+  * FreeRTOS Modbus Libary: A Modbus serial implementation for FreeRTOS
+  * Copyright (C) 2006 Christian Walter <cwalter@s-can.at>
+  *
+  * This library is free software; you can redistribute it and/or
+  * modify it under the terms of the GNU Lesser General Public
+  * License as published by the Free Software Foundation; either
+  * version 2.1 of the License, or (at your option) any later version.
+  *
+  * This library is distributed in the hope that it will be useful,
+  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  * Lesser General Public License for more details.
+  *
+  * You should have received a copy of the GNU Lesser General Public
+  * License along with this library; if not, write to the Free Software
+  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+  */
+
+
+
+/* ----------------------- System includes ----------------------------------*/
+#include "assert.h"
+#include "stdlib.h"
+#include "string.h"
+
+/* ----------------------- Platform includes --------------------------------*/
+#include "port.h"
+
+/* ----------------------- Modbus includes ----------------------------------*/
+#include "mb.h"
+#include "mbframe.h"
+#include "mbproto.h"
+#include "mbconfig.h"
+#include "mbregs.h"
+
+/* ----------------------- Defines ------------------------------------------*/
+#define MB_PDU_FUNC_READ_ADDR_OFF       ( MB_PDU_DATA_OFF )
+#define MB_PDU_FUNC_READ_REGCNT_OFF     ( MB_PDU_DATA_OFF + 2 )
+#define MB_PDU_FUNC_READ_SIZE           ( 4 )
+#define MB_PDU_FUNC_READ_REGCNT_MAX     ( 0x007D )
+
+#define MB_PDU_FUNC_WRITE_ADDR_OFF      ( MB_PDU_DATA_OFF )
+#define MB_PDU_FUNC_WRITE_VALUE_OFF     ( MB_PDU_DATA_OFF + 2 )
+#define MB_PDU_FUNC_WRITE_SIZE          ( 4 )
+
+/* ----------------------- Start implementation -----------------------------*/
+
+#if MB_FUNC_DATA_HOLDING_BLK_MAX > 0
+
+eMBException
+eMBFuncWriteRegister( UCHAR *pucFrame, USHORT * usLen )
+{
+    USHORT          usRegAddress;
+    xRegBuffer     *pxRegBuffer;
+
+    eMBException    eStatus = MB_ENOERR;
+    eMBErrorCode    eRegStatus;
+
+    if( *usLen == ( MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN ) )
+    {
+        usRegAddress = pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF] << 8;
+        usRegAddress |= pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF + 1];
+        usRegAddress++;
+
+        pxRegBuffer = prvpxMBRegLookupBuffer( MB_REG_HOLDING, usRegAddress );
+        if( pxRegBuffer != NULL )
+        {
+            /* Make callback to update the value. */
+            eRegStatus =
+                pxRegBuffer->pxRegHandler( &pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF], usRegAddress, 1, MB_REG_WRITE );
+            switch ( eRegStatus )
+            {
+                case MB_ENOERR:
+                    /* We don't modify the length because we wan't to reply
+                     * the request.
+                     */
+                    break;
+                case MB_ETIMEDOUT:
+                    eStatus = MB_EX_SLAVE_BUSY;
+                    break;
+                default:
+                    eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+                    break;
+            }
+        }
+        else
+        {
+            eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+        }
+    }
+    else
+    {
+        /* Can't be a valid request because the length is incorrect. */
+        eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+    }
+    return eStatus;
+}
+
+eMBException
+eMBFuncReadHoldingRegister( UCHAR *pucFrame, USHORT * usLen )
+{
+    USHORT          usRegAddress;
+    USHORT          usRegCount;
+    USHORT          usRegEndAddress;
+    UCHAR          *pucFrameCur;
+    xRegBuffer     *pxRegBuffer;
+
+    eMBException    eStatus = MB_ENOERR;
+    eMBErrorCode    eRegStatus;
+
+    if( *usLen == ( MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN ) )
+    {
+        usRegAddress = pucFrame[MB_PDU_FUNC_READ_ADDR_OFF] << 8;
+        usRegAddress |= pucFrame[MB_PDU_FUNC_READ_ADDR_OFF + 1];
+        usRegAddress++;
+
+        usRegCount = pucFrame[MB_PDU_FUNC_READ_REGCNT_OFF] << 8;
+        usRegCount = pucFrame[MB_PDU_FUNC_READ_REGCNT_OFF + 1];
+
+        /* Check if the number of registers to read is valid. If not
+         * return Modbus illegal data value exception. 
+         */
+        if( ( usRegCount >= 1 ) && ( usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX ) )
+        {
+            usRegEndAddress = usRegAddress + usRegCount - 1;
+            pxRegBuffer = prvpxMBRegLookupBuffer( MB_REG_HOLDING, usRegAddress );
+            /* Check if we have registers mapped on this memory location. If
+             * not return Modbus illegal data address exception.
+             */
+            if( ( pxRegBuffer != NULL ) && ( pxRegBuffer->usEndAddress >= usRegEndAddress ) )
+            {
+                /* Set the current PDU data pointer to the beginning. */
+                pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
+                *usLen = MB_PDU_FUNC_OFF;
+
+                /* First byte contains the function code. */
+                *pucFrameCur++ = MB_FUNC_READ_HOLDING_REGISTER;
+                *usLen += 1;
+
+                /* Second byte in the response contain the number of bytes. */
+                *pucFrameCur++ = usRegCount * 2;
+                *usLen += 1;
+
+                /* Make callback to fill the buffer. */
+                eRegStatus = pxRegBuffer->pxRegHandler( pucFrameCur, usRegAddress, usRegCount, MB_REG_READ );
+                switch ( eRegStatus )
+                {
+                    case MB_ENOERR:
+                        *usLen += usRegCount * 2;
+                        break;
+                    case MB_ETIMEDOUT:
+                        eStatus = MB_EX_SLAVE_BUSY;
+                        break;
+                    default:
+                        eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+                        break;
+                }
+            }
+            else
+            {
+                eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+            }
+        }
+        else
+        {
+            eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+        }
+    }
+    else
+    {
+        /* Can't be a valid request because the length is incorrect. */
+        eStatus = MB_EX_ILLEGAL_DATA_VALUE;
+    }
+    return eStatus;
+}
+
+#endif
