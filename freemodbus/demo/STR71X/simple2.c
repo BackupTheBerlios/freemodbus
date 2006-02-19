@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple.c,v 1.2 2006/02/19 17:15:09 wolti Exp $
+ * File: $Id: simple2.c,v 1.1 2006/02/19 17:15:09 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -33,18 +33,12 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 
-/* ----------------------- Defines ------------------------------------------*/
-#define xArrNElems( x ) ( sizeof( x ) / ( sizeof( x[ 0 ] ) ) )
-
 /* ----------------------- Static variables ---------------------------------*/
-static unsigned portSHORT usRegInputStart = 1000;
-static unsigned portSHORT usRegInputBuf[4];
-
-xQueueHandle    xMBPortQueueHdl;
+static unsigned portSHORT   usRegInputBuf[4];
+xQueueHandle                xMBPortQueueHdl;
 
 /* ----------------------- Static functions ---------------------------------*/
-static void     vInitTask( void *pvParameters );
-static void     vMeasureTask( void *pvParameters );
+static void     vModbusTask( void *pvParameters );
 
 static eMBErrorCode
 prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
@@ -56,66 +50,45 @@ main( void )
 {
     EIC_Init(  );
     EIC_IRQConfig( ENABLE );
-
-    ( void )xTaskCreate( vInitTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+    /* The FreeRTOS port uses a FreeRTOS queue for the event implementation. */
+    xMBPortQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) );
+    ( void )xTaskCreate( vModbusTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
     vTaskStartScheduler(  );
-
     return 0;
 }
 
 static void
-vInitTask( void *pvParameters )
+vModbusTask( void *pvParameters )
 {
-    const unsigned portCHAR ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
     portTickType xLastWakeTime;
-
-    eMBErrorCode    eStatus;
     eMBEventType    eEvent;
 
-    /* The FreeRTOS port uses a FreeRTOS queue for the event implementation. */
-    xMBPortQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) );
-    assert( xMBPortQueueHdl != NULL );
-
     /* Select either ASCII or RTU Mode. */
-    eStatus = eMBInit( MB_ASCII, 0x0A, 9600, MB_PAR_EVEN );
-    assert( eStatus == MB_ENOERR );
-    //eStatus = eMBInit(MB_RTU, 0x0A, 9600, MB_PAR_EVEN);
-    //assert( eStatus == MB_ENOERR );
-
-    /* Configure the slave id of the device. */
-    eStatus = eMBSetSlaveID( ucSlaveID, 3, pdTRUE );
-    assert( eStatus == MB_ENOERR );
-
+    eMBInit( MB_ASCII, 0x0A, 9600, MB_PAR_EVEN );
     /* Register a memory block for Input registers. */
-    eStatus = eMBAddRegister( MB_REG_INPUT, usRegInputStart, xArrNElems( usRegInputBuf ), prveInputRegister );
-    assert( eStatus == MB_ENOERR );
-
-
+    eMBAddRegister( MB_REG_INPUT, 1000, 4, prveInputRegister );
     /* Enable the Modbus Protocol Stack. */
-    eStatus = eMBEnable(  );
-
+    eMBEnable(  );
     for( ;; )
     {
-        /* The Modbus RTU or ASCII frames are sent and received in interrupt 
-         * driven state machines because of the strict timing requirements.
-         * If a complete frame has been received or sent a event is posted
-         * to a queue (The actual implementation depends on the port. See
-         * xMBPortEventPost(  ).
-         *
-         * This allows the protocol stack to transfer handling of the
-         * Modbus Application Protocol into a user task and therefore reduces
-         * the time spent in interrupts. The minimum time intervall required
-         * for calling eMBPool(  ) is given by the configured Modbus timeouts.
-         */
+        /* The notification is dependend on the actual port. The FreeRTOS
+         * port uses queues for this case. See the full examples for more
+         * information. */
         if( xQueueReceive( xMBPortQueueHdl, &eEvent, portMAX_DELAY ) == pdTRUE )
         {
             eMBPool( eEvent );
         }
-
-        /* Application specific actions. */
         
-        /* Here we simply count the number of poll cycles. */
+        /* Application specific actions. Count the number of poll cycles. */
         usRegInputBuf[0]++;
+
+        /* Hold the current FreeRTOS ticks. */
+        xLastWakeTime =  xTaskGetTickCount();
+        usRegInputBuf[1] = ( unsigned portSHORT )( xLastWakeTime >> 16UL );
+        usRegInputBuf[2] = ( unsigned portSHORT )( xLastWakeTime & 0xFFFFUL );
+
+        /* The constant value. */
+        usRegInputBuf[3] = 33;
     }
 }
 
@@ -123,8 +96,7 @@ static eMBErrorCode
 prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
                    unsigned portSHORT usNRegs, eMBRegisterMode eMode )
 {
-    int             iRegIndex = usAddress - usRegInputStart;
-
+    int             iRegIndex = usAddress - 1000;
     if( eMode == MB_REG_READ )
     {
         while( usNRegs > 0 )
@@ -135,7 +107,6 @@ prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddres
             usNRegs--;
         }
     }
-
     return MB_ENOERR;
 }
 

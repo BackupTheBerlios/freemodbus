@@ -1,6 +1,6 @@
  /*
   * FreeRTOS Modbus Libary: A Modbus serial implementation for FreeRTOS
-  * Copyright (C) 2006 Christian Walter <cwalter@s-can.at>
+  * Copyright (C) 2006 Christian Walter <wolti@sil.at>
   *
   * This library is free software; you can redistribute it and/or
   * modify it under the terms of the GNU Lesser General Public
@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbrtu.h,v 1.1 2006/02/19 15:00:53 wolti Exp $
+  * File: $Id: mbrtu.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
   */
 
 #ifndef _MB_RTU_H

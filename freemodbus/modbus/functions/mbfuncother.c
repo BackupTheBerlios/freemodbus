@@ -1,6 +1,6 @@
  /*
   * FreeRTOS Modbus Libary: A Modbus serial implementation for FreeRTOS
-  * Copyright (C) 2006 Christian Walter <cwalter@s-can.at>
+  * Copyright (C) 2006 Christian Walter <wolti@sil.at>
   *
   * This library is free software; you can redistribute it and/or
   * modify it under the terms of the GNU Lesser General Public
