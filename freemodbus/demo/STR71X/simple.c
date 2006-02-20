@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple.c,v 1.2 2006/02/19 17:15:09 wolti Exp $
+ * File: $Id: simple.c,v 1.3 2006/02/20 18:15:53 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -72,12 +72,8 @@ vInitTask( void *pvParameters )
     eMBErrorCode    eStatus;
     eMBEventType    eEvent;
 
-    /* The FreeRTOS port uses a FreeRTOS queue for the event implementation. */
-    xMBPortQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) );
-    assert( xMBPortQueueHdl != NULL );
-
     /* Select either ASCII or RTU Mode. */
-    eStatus = eMBInit( MB_ASCII, 0x0A, 9600, MB_PAR_EVEN );
+    eStatus = eMBInit( MB_RTU, 0x0A, 38400, MB_PAR_EVEN );
     assert( eStatus == MB_ENOERR );
     //eStatus = eMBInit(MB_RTU, 0x0A, 9600, MB_PAR_EVEN);
     //assert( eStatus == MB_ENOERR );
@@ -96,24 +92,13 @@ vInitTask( void *pvParameters )
 
     for( ;; )
     {
-        /* The Modbus RTU or ASCII frames are sent and received in interrupt 
-         * driven state machines because of the strict timing requirements.
-         * If a complete frame has been received or sent a event is posted
-         * to a queue (The actual implementation depends on the port. See
-         * xMBPortEventPost(  ).
-         *
-         * This allows the protocol stack to transfer handling of the
-         * Modbus Application Protocol into a user task and therefore reduces
-         * the time spent in interrupts. The minimum time intervall required
-         * for calling eMBPool(  ) is given by the configured Modbus timeouts.
+        /* Call the main polling loop of the Modbus protocol stack. Internally
+         * the polling loop waits for a new event by calling the port 
+         * dependent function xMBPortEventGet(  ). In the FreeRTOS port the
+         * event layer is built with queues.
          */
-        if( xQueueReceive( xMBPortQueueHdl, &eEvent, portMAX_DELAY ) == pdTRUE )
-        {
-            eMBPool( eEvent );
-        }
+        eMBPool(  );
 
-        /* Application specific actions. */
-        
         /* Here we simply count the number of poll cycles. */
         usRegInputBuf[0]++;
     }

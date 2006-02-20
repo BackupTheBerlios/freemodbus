@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple2.c,v 1.1 2006/02/19 17:15:09 wolti Exp $
+ * File: $Id: simple2.c,v 1.2 2006/02/20 18:15:53 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -35,7 +35,6 @@
 
 /* ----------------------- Static variables ---------------------------------*/
 static unsigned portSHORT   usRegInputBuf[4];
-xQueueHandle                xMBPortQueueHdl;
 
 /* ----------------------- Static functions ---------------------------------*/
 static void     vModbusTask( void *pvParameters );
@@ -50,9 +49,9 @@ main( void )
 {
     EIC_Init(  );
     EIC_IRQConfig( ENABLE );
-    /* The FreeRTOS port uses a FreeRTOS queue for the event implementation. */
-    xMBPortQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) );
+
     ( void )xTaskCreate( vModbusTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+
     vTaskStartScheduler(  );
     return 0;
 }
@@ -64,20 +63,15 @@ vModbusTask( void *pvParameters )
     eMBEventType    eEvent;
 
     /* Select either ASCII or RTU Mode. */
-    eMBInit( MB_ASCII, 0x0A, 9600, MB_PAR_EVEN );
+    eMBInit( MB_RTU, 0x0A, 38400, MB_PAR_EVEN );
     /* Register a memory block for Input registers. */
     eMBAddRegister( MB_REG_INPUT, 1000, 4, prveInputRegister );
     /* Enable the Modbus Protocol Stack. */
     eMBEnable(  );
     for( ;; )
     {
-        /* The notification is dependend on the actual port. The FreeRTOS
-         * port uses queues for this case. See the full examples for more
-         * information. */
-        if( xQueueReceive( xMBPortQueueHdl, &eEvent, portMAX_DELAY ) == pdTRUE )
-        {
-            eMBPool( eEvent );
-        }
+        /* Call the main polling loop of the Modbus protocol stack. */
+        eMBPool(  );
         
         /* Application specific actions. Count the number of poll cycles. */
         usRegInputBuf[0]++;

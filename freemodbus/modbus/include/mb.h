@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: mb.h,v 1.3 2006/02/20 18:15:53 wolti Exp $
   */
 
 #ifndef _MB_H
@@ -109,7 +109,7 @@ eMBErrorCode    eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, ULONG eBaudRate, e
 
 eMBErrorCode    eMBEnable( void );
 
-eMBErrorCode    eMBPool( eMBEventType eEvent );
+eMBErrorCode    eMBPool( void );
 
 eMBErrorCode    eMBSetSlaveID( UCHAR const *pucSlaveID, USHORT usSlaveIDLen, BOOL xIsRunning );
 

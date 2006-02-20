@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: portevent.c,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: portevent.c,v 1.3 2006/02/20 18:15:53 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -32,14 +32,32 @@
 #include "mbport.h"
 
 /* ----------------------- Variables ----------------------------------------*/
-extern xQueueHandle xMBPortQueueHdl;
+static xQueueHandle xMBPortQueueHdl;
 
 /* ----------------------- Start implementation -----------------------------*/
 BOOL
+xMBPortEventInit( void )
+{ 
+    xMBPortQueueHdl = xQueueCreate( 1, sizeof( eMBEventType ) );
+    return xMBPortQueueHdl != NULL ? TRUE : FALSE;
+}
+
+BOOL
 xMBPortEventPost( eMBEventType eEvent )
 {
-    portBASE_TYPE   xTaskWoken = pdFALSE;
+    portBASE_TYPE   xEventSent = pdFALSE;
 
-    xTaskWoken = xQueueSendFromISR( xMBPortQueueHdl, &eEvent, xTaskWoken );
-    return xTaskWoken == pdTRUE ? TRUE : FALSE;
+    xEventSent = xQueueSendFromISR( xMBPortQueueHdl, &eEvent, xEventSent );
+    return xEventSent == pdTRUE ? TRUE : FALSE;
+}
+
+BOOL
+xMBPortEventGet( eMBEventType *eEvent )
+{
+    BOOL xEventHappened = FALSE;
+    if( xQueueReceive( xMBPortQueueHdl, eEvent, portMAX_DELAY ) == pdTRUE )
+    {
+        xEventHappened = TRUE;
+    }
+    return xEventHappened;
 }
