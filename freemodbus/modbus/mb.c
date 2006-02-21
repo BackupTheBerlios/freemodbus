@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.3 2006/02/20 18:15:53 wolti Exp $
+  * File: $Id: mb.c,v 1.4 2006/02/21 23:11:24 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -58,17 +58,19 @@ BOOL( *pxMBFrameCBReceiveFSMCur ) ( void );
 BOOL( *pxMBFrameCBTransmitFSMCur ) ( void );
 
 static xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX] = {
+#if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
     {MB_FUNC_OTHER_REPORT_SLAVEID, eMBFuncReportSlaveID},
-#if MB_FUNC_DATA_INPUT_BLK_MAX > 0
+#endif
+#if MB_FUNC_READ_INPUT_ENABLED > 0
     {MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister},
 #endif
-#if MB_FUNC_DATA_HOLDING_BLK_MAX > 0
+#if MB_FUNC_WRITE_HOLDING_ENABLED > 0
     {MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister},
+#endif
+#if MB_FUNC_READ_HOLDING_ENABLED > 0
     {MB_FUNC_WRITE_REGISTER, eMBFuncWriteRegister},
 #endif
 };
-
-/* ----------------------- Type definitions ---------------------------------*/
 
 /* ----------------------- Static functions ---------------------------------*/
 

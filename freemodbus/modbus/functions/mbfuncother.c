@@ -31,6 +31,8 @@
 #include "mbproto.h"
 #include "mbconfig.h"
 
+#if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
+
 /* ----------------------- Static variables ---------------------------------*/
 static UCHAR    ucMBSlaveID[MB_FUNC_OTHER_REP_SLAVEID_BUF];
 static USHORT   usMBSlaveIDLen;
@@ -62,3 +64,5 @@ eMBFuncReportSlaveID( UCHAR *pucFrame, USHORT * usLen )
     *usLen = MB_PDU_DATA_OFF + usMBSlaveIDLen;
     return MB_EX_NONE;
 }
+
+#endif

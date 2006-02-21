@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple.c,v 1.3 2006/02/20 18:15:53 wolti Exp $
+ * File: $Id: simple.c,v 1.4 2006/02/21 23:11:24 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -34,21 +34,16 @@
 #include "mb.h"
 
 /* ----------------------- Defines ------------------------------------------*/
-#define xArrNElems( x ) ( sizeof( x ) / ( sizeof( x[ 0 ] ) ) )
+#define REG_INPUT_START 1000
+#define REG_INPUT_NREGS 4
 
 /* ----------------------- Static variables ---------------------------------*/
-static unsigned portSHORT usRegInputStart = 1000;
-static unsigned portSHORT usRegInputBuf[4];
-
-xQueueHandle    xMBPortQueueHdl;
+static unsigned portSHORT usRegInputStart = REG_INPUT_START;
+static unsigned portSHORT usRegInputBuf[REG_INPUT_NREGS];
 
 /* ----------------------- Static functions ---------------------------------*/
 static void     vInitTask( void *pvParameters );
 static void     vMeasureTask( void *pvParameters );
-
-static eMBErrorCode
-prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
-                   unsigned portSHORT usNRegs, eMBRegisterMode eMode );
 
 /* ----------------------- Start implementation -----------------------------*/
 int
@@ -67,7 +62,7 @@ static void
 vInitTask( void *pvParameters )
 {
     const unsigned portCHAR ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
-    portTickType xLastWakeTime;
+    portTickType    xLastWakeTime;
 
     eMBErrorCode    eStatus;
     eMBEventType    eEvent;
@@ -81,11 +76,6 @@ vInitTask( void *pvParameters )
     /* Configure the slave id of the device. */
     eStatus = eMBSetSlaveID( ucSlaveID, 3, pdTRUE );
     assert( eStatus == MB_ENOERR );
-
-    /* Register a memory block for Input registers. */
-    eStatus = eMBAddRegister( MB_REG_INPUT, usRegInputStart, xArrNElems( usRegInputBuf ), prveInputRegister );
-    assert( eStatus == MB_ENOERR );
-
 
     /* Enable the Modbus Protocol Stack. */
     eStatus = eMBEnable(  );
@@ -104,14 +94,15 @@ vInitTask( void *pvParameters )
     }
 }
 
-static eMBErrorCode
-prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
-                   unsigned portSHORT usNRegs, eMBRegisterMode eMode )
+eMBErrorCode
+eMBRegInputCB( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress, unsigned portSHORT usNRegs )
 {
-    int             iRegIndex = usAddress - usRegInputStart;
+    eMBErrorCode    eStatus = MB_ENOERR;
+    int             iRegIndex;
 
-    if( eMode == MB_REG_READ )
+    if( ( usAddress >= REG_INPUT_START ) && ( usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS ) )
     {
+        iRegIndex = usAddress - usRegInputStart;
         while( usNRegs > 0 )
         {
             *pusRegBuffer++ = usRegInputBuf[iRegIndex] >> 8;
@@ -120,8 +111,31 @@ prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddres
             usNRegs--;
         }
     }
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
 
-    return MB_ENOERR;
+    return eStatus;
+}
+
+eMBErrorCode
+eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
+{
+    return MB_ENOREG;
+}
+
+
+eMBErrorCode
+eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode )
+{
+    return MB_ENOREG;
+}
+
+eMBErrorCode
+eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete )
+{
+    return MB_ENOREG;
 }
 
 void

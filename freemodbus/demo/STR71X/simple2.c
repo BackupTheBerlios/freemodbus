@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple2.c,v 1.2 2006/02/20 18:15:53 wolti Exp $
+ * File: $Id: simple2.c,v 1.3 2006/02/21 23:11:24 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -33,15 +33,16 @@
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
 
+/* ----------------------- Defines ------------------------------------------*/
+#define REG_INPUT_START 1000
+#define REG_INPUT_NREGS 4
+
 /* ----------------------- Static variables ---------------------------------*/
-static unsigned portSHORT   usRegInputBuf[4];
+static unsigned portSHORT usRegInputStart = REG_INPUT_START;
+static unsigned portSHORT usRegInputBuf[REG_INPUT_NREGS];
 
 /* ----------------------- Static functions ---------------------------------*/
 static void     vModbusTask( void *pvParameters );
-
-static eMBErrorCode
-prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
-                   unsigned portSHORT usNRegs, eMBRegisterMode eMode );
 
 /* ----------------------- Start implementation -----------------------------*/
 int
@@ -59,40 +60,37 @@ main( void )
 static void
 vModbusTask( void *pvParameters )
 {
-    portTickType xLastWakeTime;
-    eMBEventType    eEvent;
+    portTickType    xLastWakeTime;
 
     /* Select either ASCII or RTU Mode. */
     eMBInit( MB_RTU, 0x0A, 38400, MB_PAR_EVEN );
-    /* Register a memory block for Input registers. */
-    eMBAddRegister( MB_REG_INPUT, 1000, 4, prveInputRegister );
+
     /* Enable the Modbus Protocol Stack. */
     eMBEnable(  );
     for( ;; )
     {
         /* Call the main polling loop of the Modbus protocol stack. */
         eMBPool(  );
-        
         /* Application specific actions. Count the number of poll cycles. */
         usRegInputBuf[0]++;
-
         /* Hold the current FreeRTOS ticks. */
-        xLastWakeTime =  xTaskGetTickCount();
+        xLastWakeTime = xTaskGetTickCount(  );
         usRegInputBuf[1] = ( unsigned portSHORT )( xLastWakeTime >> 16UL );
         usRegInputBuf[2] = ( unsigned portSHORT )( xLastWakeTime & 0xFFFFUL );
-
         /* The constant value. */
         usRegInputBuf[3] = 33;
     }
 }
 
-static eMBErrorCode
-prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
-                   unsigned portSHORT usNRegs, eMBRegisterMode eMode )
+eMBErrorCode
+eMBRegInputCB( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress, unsigned portSHORT usNRegs )
 {
-    int             iRegIndex = usAddress - 1000;
-    if( eMode == MB_REG_READ )
+    eMBErrorCode    eStatus = MB_ENOERR;
+    int             iRegIndex;
+
+    if( ( usAddress >= REG_INPUT_START ) && ( usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS ) )
     {
+        iRegIndex = usAddress - usRegInputStart;
         while( usNRegs > 0 )
         {
             *pusRegBuffer++ = usRegInputBuf[iRegIndex] >> 8;
@@ -101,7 +99,31 @@ prveInputRegister( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddres
             usNRegs--;
         }
     }
-    return MB_ENOERR;
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
+
+    return eStatus;
+}
+
+eMBErrorCode
+eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
+{
+    return MB_ENOREG;
+}
+
+
+eMBErrorCode
+eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode )
+{
+    return MB_ENOREG;
+}
+
+eMBErrorCode
+eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete )
+{
+    return MB_ENOREG;
 }
 
 void

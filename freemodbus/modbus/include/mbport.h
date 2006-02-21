@@ -16,11 +16,21 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbport.h,v 1.3 2006/02/20 18:15:53 wolti Exp $
+  * File: $Id: mbport.h,v 1.4 2006/02/21 23:11:24 wolti Exp $
   */
 
 #ifndef _MB_PORT_H
 #define _MB_PORT_H
+
+/* ----------------------- Type definitions ---------------------------------*/
+
+typedef enum
+{
+    EV_READY,                   /*!< Startup finished. */
+    EV_FRAME_RECEIVED,          /*!< Frame received. */
+    EV_EXECUTE,                 /*!< Execute function. */
+    EV_FRAME_SENT,              /*!< Frame sent. */
+} eMBEventType;
 
 /* ----------------------- Supporting functions -----------------------------*/
 BOOL            xMBPortEventInit( void );

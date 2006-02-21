@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbproto.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: mbproto.h,v 1.3 2006/02/21 23:11:24 wolti Exp $
   */
 
 #ifndef _MB_PROTO_H
@@ -33,7 +33,6 @@
 #define MB_FUNC_BIT_READ_DISCRETE_INPUT     (  1 )
 #define MB_FUNC_BIT_WRITE_SINGL_COIL        (  5 )
 #define MB_FUNC_BIT_WRITE_MULTIPLE_COILS    ( 15 )
-
 
 #define MB_FUNC_READ_HOLDING_REGISTER       (  3 )
 #define MB_FUNC_READ_INPUT_REGISTER         (  4 )

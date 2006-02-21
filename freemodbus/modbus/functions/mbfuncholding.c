@@ -32,7 +32,6 @@
 #include "mbframe.h"
 #include "mbproto.h"
 #include "mbconfig.h"
-#include "mbregs.h"
 
 /* ----------------------- Defines ------------------------------------------*/
 #define MB_PDU_FUNC_READ_ADDR_OFF       ( MB_PDU_DATA_OFF )
@@ -46,14 +45,12 @@
 
 /* ----------------------- Start implementation -----------------------------*/
 
-#if MB_FUNC_DATA_HOLDING_BLK_MAX > 0
+#if MB_FUNC_WRITE_HOLDING_ENABLED > 0
 
 eMBException
 eMBFuncWriteRegister( UCHAR *pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
-    xRegBuffer     *pxRegBuffer;
-
     eMBException    eStatus = MB_ENOERR;
     eMBErrorCode    eRegStatus;
 
@@ -63,30 +60,26 @@ eMBFuncWriteRegister( UCHAR *pucFrame, USHORT * usLen )
         usRegAddress |= pucFrame[MB_PDU_FUNC_WRITE_ADDR_OFF + 1];
         usRegAddress++;
 
-        pxRegBuffer = prvpxMBRegLookupBuffer( MB_REG_HOLDING, usRegAddress );
-        if( pxRegBuffer != NULL )
+        /* Make callback to update the value. */
+        eRegStatus = eMBRegHoldingCB(&pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF], usRegAddress, 1, MB_REG_WRITE );
+        switch ( eRegStatus )
         {
-            /* Make callback to update the value. */
-            eRegStatus =
-                pxRegBuffer->pxRegHandler( &pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF], usRegAddress, 1, MB_REG_WRITE );
-            switch ( eRegStatus )
-            {
-                case MB_ENOERR:
-                    /* We don't modify the length because we wan't to reply
-                     * the request.
-                     */
-                    break;
-                case MB_ETIMEDOUT:
-                    eStatus = MB_EX_SLAVE_BUSY;
-                    break;
-                default:
-                    eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
-                    break;
-            }
-        }
-        else
-        {
-            eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+            case MB_ENOERR:
+                /* We don't modify the length because we wan't to reply 
+                 * the request. */
+                break;
+
+            case MB_ENOREG:
+                eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+                break;
+
+            case MB_ETIMEDOUT:
+                eStatus = MB_EX_SLAVE_BUSY;
+                break;
+                
+            default:
+                eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+                break;
         }
     }
     else
@@ -96,6 +89,9 @@ eMBFuncWriteRegister( UCHAR *pucFrame, USHORT * usLen )
     }
     return eStatus;
 }
+#endif
+
+#if MB_FUNC_READ_HOLDING_ENABLED > 0
 
 eMBException
 eMBFuncReadHoldingRegister( UCHAR *pucFrame, USHORT * usLen )
@@ -104,7 +100,6 @@ eMBFuncReadHoldingRegister( UCHAR *pucFrame, USHORT * usLen )
     USHORT          usRegCount;
     USHORT          usRegEndAddress;
     UCHAR          *pucFrameCur;
-    xRegBuffer     *pxRegBuffer;
 
     eMBException    eStatus = MB_ENOERR;
     eMBErrorCode    eRegStatus;
@@ -123,43 +118,37 @@ eMBFuncReadHoldingRegister( UCHAR *pucFrame, USHORT * usLen )
          */
         if( ( usRegCount >= 1 ) && ( usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX ) )
         {
-            usRegEndAddress = usRegAddress + usRegCount - 1;
-            pxRegBuffer = prvpxMBRegLookupBuffer( MB_REG_HOLDING, usRegAddress );
-            /* Check if we have registers mapped on this memory location. If
-             * not return Modbus illegal data address exception.
-             */
-            if( ( pxRegBuffer != NULL ) && ( pxRegBuffer->usEndAddress >= usRegEndAddress ) )
+            /* Set the current PDU data pointer to the beginning. */
+            pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
+            *usLen = MB_PDU_FUNC_OFF;
+
+            /* First byte contains the function code. */
+            *pucFrameCur++ = MB_FUNC_READ_HOLDING_REGISTER;
+            *usLen += 1;
+
+            /* Second byte in the response contain the number of bytes. */
+            *pucFrameCur++ = usRegCount * 2;
+            *usLen += 1;
+
+            /* Make callback to fill the buffer. */
+            eRegStatus =eMBRegHoldingCB( pucFrameCur, usRegAddress, usRegCount, MB_REG_READ );
+            switch ( eRegStatus )
             {
-                /* Set the current PDU data pointer to the beginning. */
-                pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
-                *usLen = MB_PDU_FUNC_OFF;
+                case MB_ENOERR:
+                    *usLen += usRegCount * 2;
+                    break;
 
-                /* First byte contains the function code. */
-                *pucFrameCur++ = MB_FUNC_READ_HOLDING_REGISTER;
-                *usLen += 1;
+                case MB_ENOREG:
+                    eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+                    break;
 
-                /* Second byte in the response contain the number of bytes. */
-                *pucFrameCur++ = usRegCount * 2;
-                *usLen += 1;
-
-                /* Make callback to fill the buffer. */
-                eRegStatus = pxRegBuffer->pxRegHandler( pucFrameCur, usRegAddress, usRegCount, MB_REG_READ );
-                switch ( eRegStatus )
-                {
-                    case MB_ENOERR:
-                        *usLen += usRegCount * 2;
-                        break;
-                    case MB_ETIMEDOUT:
-                        eStatus = MB_EX_SLAVE_BUSY;
-                        break;
-                    default:
-                        eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
-                        break;
-                }
-            }
-            else
-            {
-                eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+                case MB_ETIMEDOUT:
+                    eStatus = MB_EX_SLAVE_BUSY;
+                    break;
+                
+                default:
+                    eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+                    break;
             }
         }
         else
@@ -176,3 +165,4 @@ eMBFuncReadHoldingRegister( UCHAR *pucFrame, USHORT * usLen )
 }
 
 #endif
+
