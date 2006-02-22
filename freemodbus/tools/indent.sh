@@ -20,7 +20,7 @@ indent \
     --indent-level4 \
     --honour-newlines \
     --no-tabs \
-     --line-length120 \
+     --line-length78 \
     $@
     
 #    --no-space-after-cast \
