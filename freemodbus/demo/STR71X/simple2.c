@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple2.c,v 1.3 2006/02/21 23:11:24 wolti Exp $
+ * File: $Id: simple2.c,v 1.4 2006/02/22 23:11:24 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -51,7 +51,8 @@ main( void )
     EIC_Init(  );
     EIC_IRQConfig( ENABLE );
 
-    ( void )xTaskCreate( vModbusTask, NULL, configMINIMAL_STACK_SIZE, NULL, tskIDLE_PRIORITY, NULL );
+    ( void )xTaskCreate( vModbusTask, NULL, configMINIMAL_STACK_SIZE, NULL,
+                         tskIDLE_PRIORITY, NULL );
 
     vTaskStartScheduler(  );
     return 0;
@@ -83,18 +84,20 @@ vModbusTask( void *pvParameters )
 }
 
 eMBErrorCode
-eMBRegInputCB( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress, unsigned portSHORT usNRegs )
+eMBRegInputCB( unsigned portCHAR * pucRegBuffer, unsigned portSHORT usAddress,
+               unsigned portSHORT usNRegs )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     int             iRegIndex;
 
-    if( ( usAddress >= REG_INPUT_START ) && ( usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS ) )
+    if( ( usAddress >= REG_INPUT_START )
+        && ( usAddress + usNRegs <= REG_INPUT_START + REG_INPUT_NREGS ) )
     {
         iRegIndex = usAddress - usRegInputStart;
         while( usNRegs > 0 )
         {
-            *pusRegBuffer++ = usRegInputBuf[iRegIndex] >> 8;
-            *pusRegBuffer++ = usRegInputBuf[iRegIndex] & 0xFF;
+            *pucRegBuffer++ = usRegInputBuf[iRegIndex] >> 8;
+            *pucRegBuffer++ = usRegInputBuf[iRegIndex] & 0xFF;
             iRegIndex++;
             usNRegs--;
         }
@@ -108,14 +111,16 @@ eMBRegInputCB( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress, u
 }
 
 eMBErrorCode
-eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
+eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs,
+                 eMBRegisterMode eMode )
 {
     return MB_ENOREG;
 }
 
 
 eMBErrorCode
-eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode )
+eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
+               eMBRegisterMode eMode )
 {
     return MB_ENOREG;
 }
