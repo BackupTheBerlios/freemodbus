@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.4 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: mb.c,v 1.5 2006/02/22 23:08:39 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -59,16 +59,22 @@ BOOL( *pxMBFrameCBTransmitFSMCur ) ( void );
 
 static xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX] = {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
-    {MB_FUNC_OTHER_REPORT_SLAVEID, eMBFuncReportSlaveID},
+    { MB_FUNC_OTHER_REPORT_SLAVEID, eMBFuncReportSlaveID },
 #endif
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-    {MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister},
+    { MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister },
 #endif
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
-    {MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister},
+    { MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister },
+#endif
+#if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
+    { MB_FUNC_WRITE_MULTIPLE_REGISTERS, eMBFuncWriteMultipleHoldingRegister },
 #endif
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
-    {MB_FUNC_WRITE_REGISTER, eMBFuncWriteRegister},
+    { MB_FUNC_WRITE_REGISTER, eMBFuncWriteHoldingRegister },
+#endif
+#if MB_FUNC_READ_COILS_ENABLED > 0
+    { MB_FUNC_READ_COILS, eMBFuncReadCoils },
 #endif
 };
 
