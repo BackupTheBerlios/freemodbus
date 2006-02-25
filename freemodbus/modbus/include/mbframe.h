@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbframe.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: mbframe.h,v 1.3 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_FRAME_H
@@ -54,13 +54,19 @@
 
 /* ----------------------- Type definitions ---------------------------------*/
 
-typedef eMBErrorCode ( *peMBFrameStart ) ( void );
+typedef         eMBErrorCode( *peMBFrameStart ) ( void );
 
-typedef eMBErrorCode ( *peMBFrameReceive ) ( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength );
+typedef         eMBErrorCode( *peMBFrameReceive ) ( UCHAR * pucRcvAddress,
+                                                    UCHAR ** pucFrame,
+                                                    USHORT * pusLength );
 
-typedef eMBErrorCode ( *peMBFrameSend ) ( UCHAR slaveAddress, const UCHAR *pucFrame, USHORT usLength );
+typedef         eMBErrorCode( *peMBFrameSend ) ( UCHAR slaveAddress,
+                                                 const UCHAR * pucFrame,
+                                                 USHORT usLength );
 
-typedef eMBErrorCode ( *peMBFrameInit ) ( UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity );
+typedef         eMBErrorCode( *peMBFrameInit ) ( UCHAR slaveAddress,
+                                                 ULONG ulBaudRate,
+                                                 eMBParity eParity );
 
 
 #endif

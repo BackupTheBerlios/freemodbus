@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbport.h,v 1.4 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: mbport.h,v 1.5 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_PORT_H
@@ -32,29 +32,45 @@ typedef enum
     EV_FRAME_SENT,              /*!< Frame sent. */
 } eMBEventType;
 
+/*! \ingroup modbus
+ * \brief Parity used for characters in serial mode.
+ * 
+ * The parity which should be applied to the characters sent over the serial
+ * link. Please note that this values are actually passed to the porting 
+ * layer and therefore not all parity modes might be available.
+ */
+typedef enum
+{
+    MB_PAR_NONE,                /*!< No parity. */
+    MB_PAR_ODD,                 /*!< Odd parity. */
+    MB_PAR_EVEN                 /*!< Even parity. */
+} eMBParity;
+
 /* ----------------------- Supporting functions -----------------------------*/
 BOOL            xMBPortEventInit( void );
 
 BOOL            xMBPortEventPost( eMBEventType eEvent );
 
-BOOL            xMBPortEventGet( eMBEventType *eEvent );
+BOOL            xMBPortEventGet( eMBEventType * eEvent );
 
 /* ----------------------- Serial port functions ----------------------------*/
 
-BOOL            xMBPortSerialInit( ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity );
+BOOL            xMBPortSerialInit( ULONG ulBaudRate, UCHAR ucDataBits,
+                                   eMBParity eParity );
 
 void            vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable );
 
-inline BOOL     xMBPortSerialGetByte( CHAR *pucByte );
+inline BOOL     xMBPortSerialGetByte( CHAR * pucByte );
 
 inline BOOL     xMBPortSerialPutByte( CHAR ucByte );
 
 /* ----------------------- Timers functions ---------------------------------*/
-BOOL            xMBPortTimersInit( USHORT usTim1Timerout100us, USHORT usTim2Timerout100us );
+BOOL            xMBPortTimersInit( USHORT usTim1Timerout100us,
+                                   USHORT usTim2Timerout100us );
 
-inline void     vMBPortTimersEnable(  );
+inline void     vMBPortTimersEnable( void );
 
-inline void     vMBPortTimersDisable(  );
+inline void     vMBPortTimersDisable( void );
 
 /* ----------------------- Callback for the protocol stack ------------------*/
 
@@ -70,12 +86,12 @@ inline void     vMBPortTimersDisable(  );
  *   a new byte was received. The port implementation should wake up the
  *   tasks which are currently blocked on the eventqueue.
  */
-BOOL            ( *pxMBFrameCBByteReceived ) ( void );
+extern          BOOL( *pxMBFrameCBByteReceived ) ( void );
 
-BOOL            ( *pxMBFrameCBTransmitterEmpty ) ( void );
+extern          BOOL( *pxMBFrameCBTransmitterEmpty ) ( void );
 
-BOOL            ( *pxMBPortCBTimer1Expired ) ( void );
+extern          BOOL( *pxMBPortCBTimer1Expired ) ( void );
 
-BOOL            ( *pxMBPortCBTimer2Expired ) ( void );
+extern          BOOL( *pxMBPortCBTimer2Expired ) ( void );
 
 #endif

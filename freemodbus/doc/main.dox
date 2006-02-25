@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: main.dox,v 1.1 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: main.dox,v 1.2 2006/02/25 18:38:03 wolti Exp $
   */
 
 /*! \mainpage FreeModbus
@@ -33,6 +33,16 @@ RTU/ASCII transmission modes defined in the
 \section into_port Ports
 
 \par ARM devices:
-- STR71X with FreeRTOS/GCC. See \example simple2.c for an example.
+- STR71X with FreeRTOS/GCC. See STR71X/simple2.c for an example.
 
+\par AVR devices:
+- ATMega168 with WinAVR. See AVR/demo.c for an example.
 */
+
+/*!
+ \example STR71X/simple2.c
+ */
+
+/*!
+ \example AVR/demo.c
+ */

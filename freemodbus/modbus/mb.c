@@ -16,11 +16,10 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.5 2006/02/22 23:08:39 wolti Exp $
+  * File: $Id: mb.c,v 1.6 2006/02/25 18:38:03 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -41,8 +40,8 @@
 #endif
 
 /* ----------------------- Static variables ---------------------------------*/
-static UCHAR *ucMBFrame;
-static UCHAR ucMBAddress;
+static UCHAR   *ucMBFrame;
+static UCHAR    ucMBAddress;
 
 static peMBFrameSend peMBFrameSendCur;
 static peMBFrameStart peMBFrameStartCur;
@@ -59,22 +58,22 @@ BOOL( *pxMBFrameCBTransmitFSMCur ) ( void );
 
 static xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX] = {
 #if MB_FUNC_OTHER_REP_SLAVEID_ENABLED > 0
-    { MB_FUNC_OTHER_REPORT_SLAVEID, eMBFuncReportSlaveID },
+    {MB_FUNC_OTHER_REPORT_SLAVEID, eMBFuncReportSlaveID},
 #endif
 #if MB_FUNC_READ_INPUT_ENABLED > 0
-    { MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister },
+    {MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister},
 #endif
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
-    { MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister },
+    {MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister},
 #endif
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
-    { MB_FUNC_WRITE_MULTIPLE_REGISTERS, eMBFuncWriteMultipleHoldingRegister },
+    {MB_FUNC_WRITE_MULTIPLE_REGISTERS, eMBFuncWriteMultipleHoldingRegister},
 #endif
 #if MB_FUNC_READ_HOLDING_ENABLED > 0
-    { MB_FUNC_WRITE_REGISTER, eMBFuncWriteHoldingRegister },
+    {MB_FUNC_WRITE_REGISTER, eMBFuncWriteHoldingRegister},
 #endif
 #if MB_FUNC_READ_COILS_ENABLED > 0
-    { MB_FUNC_READ_COILS, eMBFuncReadCoils },
+    {MB_FUNC_READ_COILS, eMBFuncReadCoils},
 #endif
 };
 
@@ -82,13 +81,15 @@ static xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX] = {
 
 /* ----------------------- Start implementation -----------------------------*/
 eMBErrorCode
-eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity )
+eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, ULONG ulBaudRate,
+         eMBParity eParity )
 {
-    eMBErrorCode eStatus = MB_ENOERR;
+    eMBErrorCode    eStatus = MB_ENOERR;
 
     /* check preconditions */
     if( ( ucSlaveAddress == MB_ADDRESS_BROADCAST ) ||
-        ( ucSlaveAddress < MB_ADDRESS_MIN ) || ( ucSlaveAddress > MB_ADDRESS_MAX ) )
+        ( ucSlaveAddress < MB_ADDRESS_MIN )
+        || ( ucSlaveAddress > MB_ADDRESS_MAX ) )
     {
         return MB_EINVAL;
     }
@@ -137,7 +138,7 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParit
 eMBErrorCode
 eMBEnable( void )
 {
-    eMBErrorCode eStatus = MB_ENOERR;
+    eMBErrorCode    eStatus = MB_ENOERR;
 
     if( peMBFrameStartCur != NULL )
     {
@@ -154,14 +155,14 @@ eMBEnable( void )
 eMBErrorCode
 eMBPool(  )
 {
-    static UCHAR ucRcvAddress;
-    static UCHAR ucFunctionCode;
-    static USHORT usLength;
+    static UCHAR    ucRcvAddress;
+    static UCHAR    ucFunctionCode;
+    static USHORT   usLength;
     static eMBException eException;
 
-    int i;
-    eMBErrorCode eStatus;
-    eMBEventType eEvent;
+    int             i;
+    eMBErrorCode    eStatus = MB_ENOERR;
+    eMBEventType    eEvent;
 
     /* Check if there is a event available. If not return control to caller.
      * Otherwise we will handle the event. */
@@ -174,11 +175,14 @@ eMBPool(  )
                 break;
 
             case EV_FRAME_RECEIVED:
-                eStatus = peMBFrameReceiveCur( &ucRcvAddress, &ucMBFrame, &usLength );
+                eStatus =
+                    peMBFrameReceiveCur( &ucRcvAddress, &ucMBFrame,
+                                         &usLength );
                 if( eStatus == MB_ENOERR )
                 {
                     /* Check if the frame is for us. If not ignore the frame. */
-                    if( ( ucRcvAddress == ucMBAddress ) || ( ucRcvAddress == MB_ADDRESS_BROADCAST ) )
+                    if( ( ucRcvAddress == ucMBAddress )
+                        || ( ucRcvAddress == MB_ADDRESS_BROADCAST ) )
                     {
                         ( void )xMBPortEventPost( EV_EXECUTE );
                     }
@@ -195,9 +199,12 @@ eMBPool(  )
                     {
                         break;
                     }
-                    else if( xFuncHandlers[i].ucFunctionCode == ucFunctionCode )
+                    else if( xFuncHandlers[i].ucFunctionCode ==
+                             ucFunctionCode )
                     {
-                        eException = xFuncHandlers[i].pxHandler( ucMBFrame, &usLength );
+                        eException =
+                            xFuncHandlers[i].pxHandler( ucMBFrame,
+                                                        &usLength );
                         break;
                     }
                 }
@@ -210,10 +217,12 @@ eMBPool(  )
                     {
                         /* An exception occured. Build an error frame. */
                         usLength = 0;
-                        ucMBFrame[usLength++] = ucFunctionCode | MB_FUNC_ERROR;
+                        ucMBFrame[usLength++] =
+                            ucFunctionCode | MB_FUNC_ERROR;
                         ucMBFrame[usLength++] = eException;
                     }
-                    eStatus = peMBFrameSendCur( ucMBAddress, ucMBFrame, usLength );
+                    eStatus =
+                        peMBFrameSendCur( ucMBAddress, ucMBFrame, usLength );
                 }
                 break;
 

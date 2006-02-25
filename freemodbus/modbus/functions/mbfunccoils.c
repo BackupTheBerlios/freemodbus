@@ -20,7 +20,6 @@
 
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -48,7 +47,6 @@ eMBFuncReadCoils( UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usCoilCount;
-    USHORT          usRegEndAddress;
     UCHAR           usNBytes;
     UCHAR          *pucFrameCur;
 

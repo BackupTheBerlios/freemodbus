@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbconfig.h,v 1.4 2006/02/22 23:08:39 wolti Exp $
+  * File: $Id: mbconfig.h,v 1.5 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_CONFIG_H
@@ -30,7 +30,7 @@
  * Maximum number of supported Modbus functions. Note that at least some
  * of the handlers are required by the protocol stack itself.
  */
-#define MB_FUNC_HANDLERS_MAX                    ( 16 )
+#define MB_FUNC_HANDLERS_MAX                    (  8 )
 
 /*! Number of bytes which should be allocated for the report slave id
  *  command.

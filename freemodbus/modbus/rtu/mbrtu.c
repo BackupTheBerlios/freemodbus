@@ -16,11 +16,10 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbrtu.c,v 1.3 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: mbrtu.c,v 1.4 2006/02/25 18:38:03 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -136,7 +135,7 @@ eMBRTUStart( void )
 }
 
 eMBErrorCode
-eMBRTUReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
+eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame, USHORT * pusLength )
 {
     BOOL            xFrameReceived = FALSE;
     eMBErrorCode    eStatus = MB_ENOERR;
@@ -145,7 +144,8 @@ eMBRTUReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
     assert( usRcvBufferPos < MB_SER_PDU_SIZE_MAX );
 
     /* Length and CRC check */
-    if( ( usRcvBufferPos > MB_SER_PDU_SIZE_MIN ) && ( usMBCRC16( ( UCHAR * )ucRTUBuf, usRcvBufferPos ) == 0 ) )
+    if( ( usRcvBufferPos > MB_SER_PDU_SIZE_MIN )
+        && ( usMBCRC16( ( UCHAR * ) ucRTUBuf, usRcvBufferPos ) == 0 ) )
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there. 
@@ -155,10 +155,11 @@ eMBRTUReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *pusLength = usRcvBufferPos - MB_SER_PDU_PDU_OFF - MB_SER_PDU_SIZE_CRC;
+        *pusLength =
+            usRcvBufferPos - MB_SER_PDU_PDU_OFF - MB_SER_PDU_SIZE_CRC;
 
         /* Return the start of the Modbus PDU to the caller. */
-        *pucFrame = ( UCHAR * )&ucRTUBuf[MB_SER_PDU_PDU_OFF];
+        *pucFrame = ( UCHAR * ) & ucRTUBuf[MB_SER_PDU_PDU_OFF];
         xFrameReceived = TRUE;
     }
     else
@@ -171,7 +172,7 @@ eMBRTUReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
 }
 
 eMBErrorCode
-eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
+eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     USHORT          usCRC16;
@@ -185,7 +186,7 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
     if( eRcvState == STATE_RX_IDLE )
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = ( UCHAR * )pucFrame - 1;
+        pucSndBufferCur = ( UCHAR * ) pucFrame - 1;
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
@@ -193,7 +194,7 @@ eMBRTUSend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
         usSndBufferCount += usLength;
 
         /* Calculate CRC16 checksum for Modbus-Serial-Line-PDU. */
-        usCRC16 = usMBCRC16( ( UCHAR * )pucSndBufferCur, usSndBufferCount );
+        usCRC16 = usMBCRC16( ( UCHAR * ) pucSndBufferCur, usSndBufferCount );
         ucRTUBuf[usSndBufferCount++] = usCRC16 & 0xFF;
         ucRTUBuf[usSndBufferCount++] = usCRC16 >> 8;
 
@@ -329,7 +330,8 @@ xMBRTUTimerT15Expired( void )
             eRcvState = STATE_RX_RCV_T15;
             break;
         default:
-            assert( ( eRcvState == STATE_RX_INIT ) || ( eRcvState == STATE_RX_RCV ) );
+            assert( ( eRcvState == STATE_RX_INIT )
+                    || ( eRcvState == STATE_RX_RCV ) );
             break;
     }
 
@@ -362,7 +364,8 @@ xMBRTUTimerT35Expired( void )
             /* Function called in an illegal state. */
         default:
             assert( ( eRcvState == STATE_RX_INIT_T15 ) ||
-                    ( eRcvState == STATE_RX_RCV_T15 ) || ( eRcvState == STATE_RX_ERROR ) );
+                    ( eRcvState == STATE_RX_RCV_T15 )
+                    || ( eRcvState == STATE_RX_ERROR ) );
     }
 
     vMBPortTimersDisable(  );

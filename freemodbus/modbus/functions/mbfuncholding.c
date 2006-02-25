@@ -20,7 +20,6 @@
 
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -174,7 +173,6 @@ eMBFuncReadHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
-    USHORT          usRegEndAddress;
     UCHAR          *pucFrameCur;
 
     eMBException    eStatus = MB_ENOERR;

@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbproto.h,v 1.4 2006/02/22 23:08:39 wolti Exp $
+  * File: $Id: mbproto.h,v 1.5 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_PROTO_H
@@ -63,7 +63,8 @@ typedef enum
     MB_EX_GATEWAY_TGT_FAILED = 0x0B,
 } eMBException;
 
-typedef         eMBException( *pxMBFunctionHandler ) ( UCHAR *pucFrame, USHORT * usLen );
+typedef         eMBException( *pxMBFunctionHandler ) ( UCHAR * pucFrame,
+                                                       USHORT * usLen );
 
 typedef struct
 {

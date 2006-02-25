@@ -18,7 +18,6 @@
   */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -42,11 +41,10 @@
 #if MB_FUNC_READ_INPUT_ENABLED > 0
 
 eMBException
-eMBFuncReadInputRegister( UCHAR *pucFrame, USHORT * usLen )
+eMBFuncReadInputRegister( UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
     USHORT          usRegCount;
-    USHORT          usRegEndAddress;
     UCHAR          *pucFrameCur;
 
     eMBException    eStatus = MB_ENOERR;
@@ -64,7 +62,8 @@ eMBFuncReadInputRegister( UCHAR *pucFrame, USHORT * usLen )
         /* Check if the number of registers to read is valid. If not
          * return Modbus illegal data value exception. 
          */
-        if( ( usRegCount >= 1 ) && ( usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX ) )
+        if( ( usRegCount >= 1 )
+            && ( usRegCount < MB_PDU_FUNC_READ_REGCNT_MAX ) )
         {
             /* Set the current PDU data pointer to the beginning. */
             pucFrameCur = &pucFrame[MB_PDU_FUNC_OFF];
@@ -78,7 +77,8 @@ eMBFuncReadInputRegister( UCHAR *pucFrame, USHORT * usLen )
             *pucFrameCur++ = usRegCount * 2;
             *usLen += 1;
 
-            eRegStatus = eMBRegInputCB( pucFrameCur, usRegAddress, usRegCount);
+            eRegStatus =
+                eMBRegInputCB( pucFrameCur, usRegAddress, usRegCount );
             switch ( eRegStatus )
             {
                 case MB_ENOERR:
@@ -92,7 +92,7 @@ eMBFuncReadInputRegister( UCHAR *pucFrame, USHORT * usLen )
                 case MB_ETIMEDOUT:
                     eStatus = MB_EX_SLAVE_BUSY;
                     break;
-                
+
                 default:
                     eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
                     break;

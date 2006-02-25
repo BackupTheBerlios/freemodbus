@@ -16,11 +16,10 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbascii.c,v 1.3 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: mbascii.c,v 1.4 2006/02/25 18:38:03 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -75,7 +74,7 @@ UCHAR           prvucMBCHAR2BIN( UCHAR ucCharacter );
 
 UCHAR           prvucMBBIN2CHAR( UCHAR ucByte );
 
-UCHAR           prvucMBLRC( UCHAR *pucFrame, USHORT usLen );
+UCHAR           prvucMBLRC( UCHAR * pucFrame, USHORT usLen );
 
 /* ----------------------- Static variables ---------------------------------*/
 static volatile eMBSndState eSndState;
@@ -104,7 +103,7 @@ eMBASCIIInit( UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity )
     ENTER_CRITICAL_SECTION(  );
     ucMBLFCharacter = MB_ASCII_DEFAULT_LF;
 
-    if( xMBPortSerialInit( ulBaudRate, 7, eParity ) != pdPASS )
+    if( xMBPortSerialInit( ulBaudRate, 7, eParity ) != TRUE )
     {
         eStatus = MB_EPORTERR;
     }
@@ -132,7 +131,8 @@ eMBASCIIStart( void )
 }
 
 eMBErrorCode
-eMBASCIIReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
+eMBASCIIReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame,
+                 USHORT * pusLength )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
@@ -140,7 +140,8 @@ eMBASCIIReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
     assert( usRcvBufferPos < MB_SER_PDU_SIZE_MAX );
 
     /* Length and CRC check */
-    if( ( usRcvBufferPos > MB_SER_PDU_SIZE_MIN ) && ( prvucMBLRC( ( UCHAR * )ucASCIIBuf, usRcvBufferPos ) == 0 ) )
+    if( ( usRcvBufferPos > MB_SER_PDU_SIZE_MIN )
+        && ( prvucMBLRC( ( UCHAR * ) ucASCIIBuf, usRcvBufferPos ) == 0 ) )
     {
         /* Save the address field. All frames are passed to the upper layed
          * and the decision if a frame is used is done there. 
@@ -150,10 +151,11 @@ eMBASCIIReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
         /* Total length of Modbus-PDU is Modbus-Serial-Line-PDU minus
          * size of address field and CRC checksum.
          */
-        *pusLength = usRcvBufferPos - MB_SER_PDU_PDU_OFF - MB_SER_PDU_SIZE_LRC;
+        *pusLength =
+            usRcvBufferPos - MB_SER_PDU_PDU_OFF - MB_SER_PDU_SIZE_LRC;
 
         /* Return the start of the Modbus PDU to the caller. */
-        *pucFrame = ( UCHAR * )&ucASCIIBuf[MB_SER_PDU_PDU_OFF];
+        *pucFrame = ( UCHAR * ) & ucASCIIBuf[MB_SER_PDU_PDU_OFF];
     }
     else
     {
@@ -164,12 +166,12 @@ eMBASCIIReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength )
 }
 
 eMBErrorCode
-eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
+eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     UCHAR           usLRC;
 
-    portENTER_CRITICAL(  );
+    ENTER_CRITICAL_SECTION(  );
     /* Check if the receiver is still in idle state. If not we where to
      * slow with processing the received frame and the master sent another
      * frame on the network. We have to abort sending the frame.
@@ -177,7 +179,7 @@ eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
     if( eRcvState == STATE_RX_IDLE )
     {
         /* First byte before the Modbus-PDU is the slave address. */
-        pucSndBufferCur = ( UCHAR * )pucFrame - 1;
+        pucSndBufferCur = ( UCHAR * ) pucFrame - 1;
         usSndBufferCount = 1;
 
         /* Now copy the Modbus-PDU into the Modbus-Serial-Line-PDU. */
@@ -185,7 +187,7 @@ eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
         usSndBufferCount += usLength;
 
         /* Calculate LRC checksum for Modbus-Serial-Line-PDU. */
-        usLRC = prvucMBLRC( ( UCHAR * )pucSndBufferCur, usSndBufferCount );
+        usLRC = prvucMBLRC( ( UCHAR * ) pucSndBufferCur, usSndBufferCount );
         ucASCIIBuf[usSndBufferCount++] = usLRC;
 
         /* Activate the transmitter. */
@@ -194,10 +196,9 @@ eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR *pucFrame, USHORT usLength )
     }
     else
     {
-        portEXIT_CRITICAL(  );
         eStatus = MB_EIO;
     }
-    portEXIT_CRITICAL(  );
+    EXIT_CRITICAL_SECTION(  );
     return eStatus;
 }
 
@@ -382,7 +383,7 @@ xMBASCIITransmitFSM( void )
              * idle state.  */
         case STATE_TX_IDLE:
             /* enable receiver/disable transmitter. */
-            vMBPortSerialEnable( pdTRUE, pdFALSE );
+            vMBPortSerialEnable( TRUE, FALSE );
             break;
     }
 
@@ -403,7 +404,8 @@ xMBASCIITimerT1SExpired( void )
             break;
 
         default:
-            assert( ( eRcvState == STATE_RX_RCV ) || ( eRcvState == STATE_RX_WAIT_EOF ) );
+            assert( ( eRcvState == STATE_RX_RCV )
+                    || ( eRcvState == STATE_RX_WAIT_EOF ) );
             break;
     }
     vMBPortTimersDisable(  );
@@ -451,7 +453,7 @@ prvucMBBIN2CHAR( UCHAR ucByte )
 
 
 UCHAR
-prvucMBLRC( UCHAR *pucFrame, USHORT usLen )
+prvucMBLRC( UCHAR * pucFrame, USHORT usLen )
 {
     UCHAR           ucLRC = 0;  /* LRC char initialized */
 
@@ -461,7 +463,7 @@ prvucMBLRC( UCHAR *pucFrame, USHORT usLen )
     }
 
     /* Return twos complement */
-    ucLRC = ( UCHAR )( -( ( CHAR )ucLRC ) );
+    ucLRC = ( UCHAR ) ( -( ( CHAR ) ucLRC ) );
     return ucLRC;
 }
 

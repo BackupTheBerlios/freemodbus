@@ -16,19 +16,22 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbrtu.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: mbrtu.h,v 1.3 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_RTU_H
 #define _MB_RTU_H
 
-eMBErrorCode    eMBRTUInit( UCHAR slaveAddress, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode    eMBRTUInit( UCHAR slaveAddress, ULONG ulBaudRate,
+                            eMBParity eParity );
 
 eMBErrorCode    eMBRTUStart( void );
 
-eMBErrorCode    eMBRTUReceive( UCHAR *pucRcvAddress, UCHAR **pucFrame, USHORT * pusLength );
+eMBErrorCode    eMBRTUReceive( UCHAR * pucRcvAddress, UCHAR ** pucFrame,
+                               USHORT * pusLength );
 
-eMBErrorCode    eMBRTUSend( UCHAR slaveAddress, const UCHAR *pucFrame, USHORT usLength );
+eMBErrorCode    eMBRTUSend( UCHAR slaveAddress, const UCHAR * pucFrame,
+                            USHORT usLength );
 
 BOOL            xMBRTUReceiveFSM( void );
 

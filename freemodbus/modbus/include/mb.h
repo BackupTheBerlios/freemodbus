@@ -16,13 +16,14 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.h,v 1.4 2006/02/21 23:11:24 wolti Exp $
+  * File: $Id: mb.h,v 1.5 2006/02/25 18:38:03 wolti Exp $
   */
 
 #ifndef _MB_H
 #define _MB_H
 
 #include "port.h"
+#include "mbport.h"
 
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
@@ -65,20 +66,6 @@ typedef enum
 } eMBMode;
 
 /*! \ingroup modbus
- * \brief Parity used for characters in serial mode.
- * 
- * The parity which should be applied to the characters sent over the serial
- * link. Please note that this values are actually passed to the porting 
- * layer and therefore not all parity modes might be available.
- */
-typedef enum
-{
-    MB_PAR_NONE,                /*!< No parity. */
-    MB_PAR_ODD,                 /*!< Odd parity. */
-    MB_PAR_EVEN                 /*!< Even parity. */
-} eMBParity;
-
-/*! \ingroup modbus
  * \brief If register should be written or read.
  *
  * This value is passed to the callback functions which support either
@@ -109,39 +96,6 @@ typedef enum
     MB_ETIMEDOUT                /*!< timeout error occured. */
 } eMBErrorCode;
 
-/* A function which is called whenever the Modbus protocol stack receives
- * a read or write request for the registered register range.
- *
- * \param eMode If eMode is eMBRegisterMode::MB_REG_WRITE the application 
- *   register values should be updated. If eMode is eMBRegisterMode::MB_REG_READ
- *   the Modbus application protocol stack wants to know the current values. 
- *
- * \param pusRegBuffer If eMode is MB_REG_READ the current register
- *   values must be written to the buffer pusRegBuffer. I.e the register
- *   with offset one should be written to pucRegBuffer[0] = high byte and to 
- *   pucRegBuffer[1] = low byte.<br>
- *   If eMode is MB_REG_WRITE the application register values should
- *   be updated. For each register starting at address usAddress two
- *   bytes are available in the buffer where the first byte is the high
- *   byte of the register value.
- *
- * \param usAddress The register start address.
- *
- * \param usNRegs Number of registers.
- *
- * \return eMBRegisterMode::MB_ENOERR is no error occurred. The other return
- *   values result in a Modbus Application Protocol exception. This should not 
- *   be used for application error reporting (See the section exceptions in the
- *   Modbus standard). The following other return codes are allowed:
- *   eMBErrorCode::MB_ETIMEDOUT If a timeout error occurred. This results
- *     in <b>SLAVE DEVICE BUSY</b> exception.
- *   eMBErrorCode::MB_EIO If an error occurred. This results in a 
- *     <b>SLAVE DEVICE FAILURE</b> exception.
- */
-typedef
- 
-      eMBErrorCode( *peMBRegHandler ) ( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode );
-
 /* ----------------------- Function prototypes ------------------------------*/
 /*! \ingroup modbus
  * \brief Initialize the Modbus protocol stack.
@@ -164,7 +118,8 @@ typedef
  *        slave addresses are in the range 1 - 247.
  *    - eMBErrorCode::MB_EPORTERR IF the porting layer returned an error.
  */
-eMBErrorCode    eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity );
+eMBErrorCode    eMBInit( eMBMode eMode, UCHAR ucSlaveAddress,
+                         ULONG ulBaudRate, eMBParity eParity );
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -202,7 +157,8 @@ eMBErrorCode    eMBPool( void );
  * \param xIsRunning If TRUE the <em>Run Indicator Status</em> byte is set to 0xFF.
  *   otherwise the <em>Run Indicator Status</em> is 0x00.
  */
-eMBErrorCode    eMBSetSlaveID( UCHAR const *pucSlaveID, USHORT usSlaveIDLen, BOOL xIsRunning );
+eMBErrorCode    eMBSetSlaveID( UCHAR const *pucSlaveID, USHORT usSlaveIDLen,
+                               BOOL xIsRunning );
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -245,7 +201,8 @@ eMBErrorCode    eMBSetSlaveID( UCHAR const *pucSlaveID, USHORT usSlaveIDLen, BOO
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occured. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs );
+eMBErrorCode    eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress,
+                               USHORT usNRegs );
 
 /*! \ingroup modbus_registers
  * \brief Callback function used if a <em>Holding Register</em> value is
@@ -274,9 +231,43 @@ eMBErrorCode    eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT us
  *   - eMBErrorCode::MB_EIO If an unrecoverable error occured. In this case
  *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
  */
-eMBErrorCode    eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode );
+eMBErrorCode    eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress,
+                                 USHORT usNRegs, eMBRegisterMode eMode );
 
-eMBErrorCode    eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils, eMBRegisterMode eMode );
+/*! \ingroup modbus_registers
+ * \brief Callback function used if a <em>Coil Register</em> value is
+ *   read or written by the protocol stack.
+ *
+ * \param pucRegBuffer The bits are packed in bytes where the first coil 
+ *   starting at address <code>usAddress</code> is stored at the LSB of the 
+ *   first byte in the buffer <code>pucRegBuffer</code>. 
+ *   If the buffer should be written by the callback function unused 
+ *   coil values (I.e. if not a multiple of eight coils is used) should be set 
+ *   to zero. 
+ * \param usAddress The starting address of the register.
+ * \param usNCoils Number of coil registers values requested. I.e. first register
+ *   is given by <code>usAddress</code> and last by 
+ *   <code>usAddress + usNRegs</code>. 
+ * \param eMode If eMBRegisterMode::MB_REG_WRITE the register value should be 
+ *   updated. In this case the application would read the new register values 
+ *   from the buffer <code>pucRegBuffer</code>. If 
+ *   eMBRegisterMode::MB_REG_READ the applicatin should store the current
+ *   values in the buffer <code>pucRegBuffer</code>.
+ * \return The function must return one of the following error codes:
+ *   - eMBErrorCode::MB_ENOERR If no error occured. In this case a normal
+ *       Modbus response is sent.
+ *   - eMBErrorCode::MB_ENOREG If no register on this address is available.
+ *       In this case a <b>ILLEGAL DATA ADDRESS</b> is sent as a response.
+ *   - eMBErrorCode::MB_ETIMEDOUT If the requested register block is
+ *       currently not available and the application dependent response
+ *       timeout would be violated. In this case a <b>SLAVE DEVICE BUSY</b>
+ *       exception is sent as a response.
+ *   - eMBErrorCode::MB_EIO If an unrecoverable error occured. In this case
+ *       a <b>SLAVE DEVICE FAILURE</b> exception is sent as a response.
+ */
+eMBErrorCode    eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress,
+                               USHORT usNCoils, eMBRegisterMode eMode );
 
-eMBErrorCode    eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNDiscrete );
+eMBErrorCode    eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress,
+                                  USHORT usNDiscrete );
 #endif

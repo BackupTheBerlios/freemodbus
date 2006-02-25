@@ -18,7 +18,6 @@
   */
 
 /* ----------------------- System includes ----------------------------------*/
-#include "assert.h"
 #include "stdlib.h"
 #include "string.h"
 
@@ -40,7 +39,8 @@ static USHORT   usMBSlaveIDLen;
 /* ----------------------- Start implementation -----------------------------*/
 
 eMBErrorCode
-eMBSetSlaveID( const UCHAR *pucSlaveID, USHORT usSlaveIDLen, BOOL xIsRunning )
+eMBSetSlaveID( const UCHAR * pucSlaveID, USHORT usSlaveIDLen,
+               BOOL xIsRunning )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
@@ -58,7 +58,7 @@ eMBSetSlaveID( const UCHAR *pucSlaveID, USHORT usSlaveIDLen, BOOL xIsRunning )
 }
 
 eMBException
-eMBFuncReportSlaveID( UCHAR *pucFrame, USHORT * usLen )
+eMBFuncReportSlaveID( UCHAR * pucFrame, USHORT * usLen )
 {
     memcpy( pucFrame + MB_PDU_DATA_OFF, &ucMBSlaveID[0], usMBSlaveIDLen );
     *usLen = MB_PDU_DATA_OFF + usMBSlaveIDLen;
