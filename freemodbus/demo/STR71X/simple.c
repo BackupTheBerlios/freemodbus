@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: simple.c,v 1.5 2006/02/22 23:11:24 wolti Exp $
+ * File: $Id: simple.c,v 1.6 2006/02/25 18:34:08 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -96,8 +96,7 @@ vInitTask( void *pvParameters )
 }
 
 eMBErrorCode
-eMBRegInputCB( unsigned portCHAR * pucRegBuffer, unsigned portSHORT usAddress,
-               unsigned portSHORT usNRegs )
+eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     int             iRegIndex;

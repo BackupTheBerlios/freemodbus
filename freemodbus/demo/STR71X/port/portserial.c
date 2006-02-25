@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: portserial.c,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: portserial.c,v 1.3 2006/02/25 18:34:08 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -117,9 +117,10 @@ xMBPortSerialInit( ULONG ulBaudRate, UCHAR ucDataBits, eMBParity eParity )
         UART_FifoReset( MB_UART_DEV, UART_RxFIFO );
         UART_FifoReset( MB_UART_DEV, UART_TxFIFO );
         UART_LoopBackConfig( MB_UART_DEV, DISABLE );
-        UART_Config( MB_UART_DEV, ulBaudRate, eUARTParity, UART_1_StopBits, eUARTMode );
+        UART_Config( MB_UART_DEV, ulBaudRate, eUARTParity, UART_1_StopBits,
+                     eUARTMode );
         UART_RxConfig( UART0, ENABLE );
-        vMBPortSerialEnable( pdFALSE, pdFALSE );
+        vMBPortSerialEnable( FALSE, FALSE );
 
         /* Configure the IEC for the UART interrupts. */
         EIC_IRQChannelPriorityConfig( MB_UART_IRQ_CH, MB_IRQ_PRIORITY );
@@ -150,7 +151,7 @@ xMBPortSerialPutByte( CHAR ucByte )
 }
 
 BOOL
-xMBPortSerialGetByte( CHAR *pucByte )
+xMBPortSerialGetByte( CHAR * pucByte )
 {
     *pucByte = MB_UART_DEV->RxBUFR;
     return TRUE;
@@ -174,8 +175,8 @@ prvvMBSerialIRQHandler( void )
 {
     portENTER_SWITCHING_ISR(  );
 
-    static BOOL     xTaskWokenReceive = pdFALSE;
-    static BOOL     xTaskWokenTransmit = pdFALSE;
+    static BOOL     xTaskWokenReceive = FALSE;
+    static BOOL     xTaskWokenTransmit = FALSE;
     static USHORT   usStatus;
 
     usStatus = UART_FlagStatus( MB_UART_DEV );
@@ -192,5 +193,6 @@ prvvMBSerialIRQHandler( void )
     /* End the interrupt in the EIC. */
     EIC->IPR |= 1 << EIC_CurrentIRQChannelValue(  );
 
-    portEXIT_SWITCHING_ISR( xTaskWokenReceive || xTaskWokenTransmit );
+    portEXIT_SWITCHING_ISR( ( xTaskWokenReceive
+                              || xTaskWokenTransmit ) ? pdTRUE : pdFALSE );
 }

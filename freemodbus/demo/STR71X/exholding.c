@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: exholding.c,v 1.1 2006/02/22 23:09:34 wolti Exp $
+ * File: $Id: exholding.c,v 1.2 2006/02/25 18:34:08 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -84,8 +84,7 @@ vModbusTask( void *pvParameters )
 }
 
 eMBErrorCode
-eMBRegInputCB( unsigned portCHAR * pusRegBuffer, unsigned portSHORT usAddress,
-               unsigned portSHORT usNRegs )
+eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs )
 {
     return MB_ENOREG;
 }

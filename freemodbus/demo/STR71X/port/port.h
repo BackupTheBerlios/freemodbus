@@ -16,24 +16,25 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: port.h,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: port.h,v 1.3 2006/02/25 18:34:08 wolti Exp $
   */
 
 #ifndef _PORT_H
 #define _PORT_H
 
+#include "assert.h"
 #include "freertos.h"
 
 #define ENTER_CRITICAL_SECTION( )   portENTER_CRITICAL( )
 #define EXIT_CRITICAL_SECTION( )    portEXIT_CRITICAL( )
 
-typedef char BOOL;
+typedef char    BOOL;
 
 typedef unsigned char UCHAR;
-typedef char CHAR;
+typedef char    CHAR;
 
 typedef unsigned short USHORT;
-typedef short SHORT;
+typedef short   SHORT;
 
 typedef unsigned long ULONG;
 typedef long    LONG;

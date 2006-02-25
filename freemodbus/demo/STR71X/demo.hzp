@@ -4,9 +4,6 @@
     <configuration Target="STR711F" property_groups_file_path="$(StudioDir)/targets/ST_STR71x/propertyGroups.xml" linker_memory_map_file="$(StudioDir)/targets/ST_STR71x/ST_STR711F_MemoryMap.xml" project_directory="" link_include_startup_code="No" project_type="Executable" Name="Common" />
     <configuration target_reset_script="RAMReset()" Name="RAM" />
     <configuration arm_target_flash_loader_file_path="$(StudioDir)/targets/ST_STR71x/Release/Loader.exe" target_reset_script="FLASHReset()" Name="Flash" />
-    <folder Name="Source Files" >
-      <configuration filter="c;cpp;cxx;cc;h;s;asm;inc" Name="Common" />
-    </folder>
     <folder Name="System Files" >
       <file file_name="$(StudioDir)/targets/sram_placement.xml" Name="sram_placement.xml" >
         <configuration build_exclude_from_build="Yes" Name="Flash" />
@@ -70,6 +67,7 @@
         <file file_name="../../modbus/functions/mbfuncholding.c" Name="mbfuncholding.c" />
         <file file_name="../../modbus/functions/mbfuncinput.c" Name="mbfuncinput.c" />
         <file file_name="../../modbus/functions/mbfuncother.c" Name="mbfuncother.c" />
+        <file file_name="../../modbus/functions/mbfunccoils.c" Name="mbfunccoils.c" />
       </folder>
       <folder Name="ASCII" >
         <file file_name="../../modbus/ascii/mbascii.h" Name="mbascii.h" />

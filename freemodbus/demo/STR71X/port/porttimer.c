@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: porttimer.c,v 1.2 2006/02/19 17:15:09 wolti Exp $
+  * File: $Id: porttimer.c,v 1.3 2006/02/25 18:34:08 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -63,28 +63,32 @@ xMBPortTimersInit( USHORT usTim1Timerout50us, USHORT usTim2Timerout50us )
 {
     /* Calculate output compare value for timer1. */
     usTimerDeltaOCRA =
-        ( ( configCPU_CLOCK_HZ / ( MB_TIMER_PRESCALER + 1 ) ) * usTim1Timerout50us ) / ( MB_TIMER_TICKS );
+        ( ( configCPU_CLOCK_HZ / ( MB_TIMER_PRESCALER + 1 ) ) *
+          usTim1Timerout50us ) / ( MB_TIMER_TICKS );
 
     /* Calculate output compare value for timer2. */
     usTimerDeltaOCRB =
-        ( ( configCPU_CLOCK_HZ / ( MB_TIMER_PRESCALER + 1 ) ) * usTim2Timerout50us ) / ( MB_TIMER_TICKS );
+        ( ( configCPU_CLOCK_HZ / ( MB_TIMER_PRESCALER + 1 ) ) *
+          usTim2Timerout50us ) / ( MB_TIMER_TICKS );
 
     TIM_Init( MB_TIMER_DEV );
     TIM_PrescalerConfig( MB_TIMER_DEV, MB_TIMER_PRESCALER );
     if( usTimerDeltaOCRA > 0 )
     {
-        TIM_OCMPModeConfig( MB_TIMER_DEV, TIM_CHANNEL_A, usTimerDeltaOCRA, TIM_TIMING, TIM_LOW );
+        TIM_OCMPModeConfig( MB_TIMER_DEV, TIM_CHANNEL_A, usTimerDeltaOCRA,
+                            TIM_TIMING, TIM_LOW );
     }
     if( usTimerDeltaOCRB > 0 )
     {
-        TIM_OCMPModeConfig( MB_TIMER_DEV, TIM_CHANNEL_B, usTimerDeltaOCRB, TIM_TIMING, TIM_LOW );
+        TIM_OCMPModeConfig( MB_TIMER_DEV, TIM_CHANNEL_B, usTimerDeltaOCRB,
+                            TIM_TIMING, TIM_LOW );
     }
 
     vMBPortTimersDisable(  );
     EIC_IRQChannelConfig( MB_TIMER_IRQ_CH, ENABLE );
     EIC_IRQChannelPriorityConfig( MB_TIMER_IRQ_CH, MB_IRQ_PRIORITY );
 
-    return pdPASS;
+    return TRUE;
 }
 
 void
@@ -94,12 +98,14 @@ prvvMBTimerIRQHandler( void )
 
     static portBASE_TYPE xTaskSwitch = pdFALSE;
 
-    if( ( usTimerDeltaOCRA > 0 ) && ( TIM_FlagStatus( MB_TIMER_DEV, TIM_OCFA ) ) )
+    if( ( usTimerDeltaOCRA > 0 )
+        && ( TIM_FlagStatus( MB_TIMER_DEV, TIM_OCFA ) ) )
     {
         xTaskSwitch |= pxMBPortCBTimer1Expired(  );
         TIM_FlagClear( MB_TIMER_DEV, TIM_OCFA );
     }
-    if( ( usTimerDeltaOCRB > 0 ) && ( TIM_FlagStatus( MB_TIMER_DEV, TIM_OCFB ) ) )
+    if( ( usTimerDeltaOCRB > 0 )
+        && ( TIM_FlagStatus( MB_TIMER_DEV, TIM_OCFB ) ) )
     {
         xTaskSwitch |= pxMBPortCBTimer2Expired(  );
         TIM_FlagClear( MB_TIMER_DEV, TIM_OCFB );
