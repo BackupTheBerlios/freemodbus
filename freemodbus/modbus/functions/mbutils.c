@@ -24,6 +24,10 @@
 /* ----------------------- Platform includes --------------------------------*/
 #include "port.h"
 
+/* ----------------------- Modbus includes ----------------------------------*/
+#include "mb.h"
+#include "mbproto.h"
+
 /* ----------------------- Defines ------------------------------------------*/
 #define BITS_UCHAR      8
 
@@ -96,4 +100,31 @@ xMBUtilGetBits( UCHAR * ucByteBuf, USHORT usBitOffset, UCHAR usNBits )
     usWordBuf &= usMask;
 
     return ( UCHAR ) usWordBuf;
+}
+
+eMBException
+prveMBError2Exception( eMBErrorCode eErrorCode )
+{
+    eMBException    eStatus;
+
+    switch ( eErrorCode )
+    {
+        case MB_ENOERR:
+            eStatus = MB_EX_NONE;
+            break;
+
+        case MB_ENOREG:
+            eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
+            break;
+
+        case MB_ETIMEDOUT:
+            eStatus = MB_EX_SLAVE_BUSY;
+            break;
+
+        default:
+            eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
+            break;
+    }
+
+    return eStatus;
 }

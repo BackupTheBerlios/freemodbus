@@ -49,6 +49,9 @@
 #define MB_PDU_FUNC_WRITE_MUL_SIZE_MIN      ( 5 )
 #define MB_PDU_FUNC_WRITE_MUL_REGCNT_MAX    ( 0x0078 )
 
+/* ----------------------- Static functions ---------------------------------*/
+eMBException    prveMBError2Exception( eMBErrorCode eErrorCode );
+
 /* ----------------------- Start implementation -----------------------------*/
 
 #if MB_FUNC_WRITE_HOLDING_ENABLED > 0
@@ -67,27 +70,13 @@ eMBFuncWriteHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
         usRegAddress++;
 
         /* Make callback to update the value. */
-        eRegStatus =
-            eMBRegHoldingCB( &pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF],
-                             usRegAddress, 1, MB_REG_WRITE );
-        switch ( eRegStatus )
+        eRegStatus = eMBRegHoldingCB( &pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF],
+                                      usRegAddress, 1, MB_REG_WRITE );
+
+        /* If an error occured convert it into a Modbus exception. */
+        if( eRegStatus != MB_ENOERR )
         {
-            case MB_ENOERR:
-                /* We don't modify the length because we wan't to reply 
-                 * the request. */
-                break;
-
-            case MB_ENOREG:
-                eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
-                break;
-
-            case MB_ETIMEDOUT:
-                eStatus = MB_EX_SLAVE_BUSY;
-                break;
-
-            default:
-                eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
-                break;
+            eStatus = prveMBError2Exception( eRegStatus );
         }
     }
     else
@@ -129,27 +118,19 @@ eMBFuncWriteMultipleHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
             eRegStatus =
                 eMBRegHoldingCB( &pucFrame[MB_PDU_FUNC_WRITE_MUL_VALUES_OFF],
                                  usRegAddress, usRegCount, MB_REG_WRITE );
-            switch ( eRegStatus )
+
+            /* If an error occured convert it into a Modbus exception. */
+            if( eRegStatus != MB_ENOERR )
             {
-                case MB_ENOERR:
-                    /* The response contains the function code, the starting
-                     * address and the quantity of registers. We reuse the
-                     * old values in the buffer because they are still valid.
-                     */
-                    *usLen = MB_PDU_FUNC_WRITE_MUL_BYTECNT_OFF;
-                    break;
-
-                case MB_ENOREG:
-                    eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
-                    break;
-
-                case MB_ETIMEDOUT:
-                    eStatus = MB_EX_SLAVE_BUSY;
-                    break;
-
-                default:
-                    eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
-                    break;
+                eStatus = prveMBError2Exception( eRegStatus );
+            }
+            else
+            {
+                /* The response contains the function code, the starting
+                 * address and the quantity of registers. We reuse the
+                 * old values in the buffer because they are still valid.
+                 */
+                *usLen = MB_PDU_FUNC_WRITE_MUL_BYTECNT_OFF;
             }
         }
         else
@@ -209,23 +190,14 @@ eMBFuncReadHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
             eRegStatus =
                 eMBRegHoldingCB( pucFrameCur, usRegAddress, usRegCount,
                                  MB_REG_READ );
-            switch ( eRegStatus )
+            /* If an error occured convert it into a Modbus exception. */
+            if( eRegStatus != MB_ENOERR )
             {
-                case MB_ENOERR:
-                    *usLen += usRegCount * 2;
-                    break;
-
-                case MB_ENOREG:
-                    eStatus = MB_EX_ILLEGAL_DATA_ADDRESS;
-                    break;
-
-                case MB_ETIMEDOUT:
-                    eStatus = MB_EX_SLAVE_BUSY;
-                    break;
-
-                default:
-                    eStatus = MB_EX_SLAVE_DEVICE_FAILURE;
-                    break;
+                eStatus = prveMBError2Exception( eRegStatus );
+            }
+            else
+            {
+                *usLen += usRegCount * 2;
             }
         }
         else

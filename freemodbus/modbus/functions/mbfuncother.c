@@ -38,9 +38,9 @@ static USHORT   usMBSlaveIDLen;
 
 /* ----------------------- Start implementation -----------------------------*/
 
-eMBErrorCode   
+eMBErrorCode
 eMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
-               UCHAR const *pucAdditional, USHORT usAdditionalLen)
+               UCHAR const *pucAdditional, USHORT usAdditionalLen )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
@@ -52,8 +52,10 @@ eMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
         usMBSlaveIDLen = 0;
         ucMBSlaveID[usMBSlaveIDLen++] = ucSlaveID;
         ucMBSlaveID[usMBSlaveIDLen++] = xIsRunning ? 0xFF : 0x00;
-        if( usAdditionalLen > 0 ) {
-            memcpy( &ucMBSlaveID[usMBSlaveIDLen], pucAdditional, usAdditionalLen );
+        if( usAdditionalLen > 0 )
+        {
+            memcpy( &ucMBSlaveID[usMBSlaveIDLen], pucAdditional,
+                    usAdditionalLen );
             usMBSlaveIDLen += usAdditionalLen;
         }
     }
