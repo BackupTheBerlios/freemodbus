@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: excoils.c,v 1.2 2006/02/25 18:34:08 wolti Exp $
+ * File: $Id: excoils.c,v 1.3 2006/02/28 00:22:10 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -32,18 +32,17 @@
 
 /* ----------------------- Modbus includes ----------------------------------*/
 #include "mb.h"
+#include "mbutils.h"
 
 /* ----------------------- Defines ------------------------------------------*/
 #define REG_COILS_START     1000
 #define REG_COILS_SIZE      16
 
 /* ----------------------- Static variables ---------------------------------*/
-static unsigned portSHORT usRegCoilsStart = REG_COILS_START;
-static unsigned portCHAR ucRegCoilsBuf[REG_COILS_SIZE] = { 0xA5, 0x5A };
+static unsigned char ucRegCoilsBuf[REG_COILS_SIZE] = { 0, 0 };
 
 /* ----------------------- Static functions ---------------------------------*/
 static void     vModbusTask( void *pvParameters );
-static unsigned portCHAR prvucGetCoilValue( unsigned portSHORT usAddress );
 
 /* ----------------------- Start implementation -----------------------------*/
 int
@@ -62,11 +61,10 @@ main( void )
 static void
 vModbusTask( void *pvParameters )
 {
-    int             i;
     portTickType    xLastWakeTime;
 
     /* Select either ASCII or RTU Mode. */
-    eMBInit( MB_RTU, 0x0A, 9600, MB_PAR_EVEN );
+    eMBInit( MB_RTU, 0x0A, 38400, MB_PAR_EVEN );
 
     /* Enable the Modbus Protocol Stack. */
     eMBEnable(  );
@@ -77,45 +75,43 @@ vModbusTask( void *pvParameters )
     }
 }
 
-unsigned        portCHAR
-prvucGetCoilValue( unsigned portSHORT usAddress )
-{
-    unsigned portCHAR ucValue = 0;
-    int             iCoilIndex;
-    int             iCoilOffset;
-
-    iCoilIndex = ( usAddress - usRegCoilsStart ) / 8;
-    iCoilOffset = ( usAddress - usRegCoilsStart ) % 8;
-
-    ucValue = ucRegCoilsBuf[iCoilIndex] >> iCoilOffset;
-
-    /* If address is not a multiple of eight some other values might
-     * be stored in the next coil buffer register. */
-    if( ( iCoilOffset != 0 ) && ( iCoilIndex < REG_COILS_SIZE / 8 ) )
-    {
-        /* Add the values from the next coil buffer register. */
-        ucValue |= ucRegCoilsBuf[iCoilIndex + 1] << ( 8 - iCoilOffset );
-    }
-    return ucValue;
-}
-
 eMBErrorCode
 eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
                eMBRegisterMode eMode )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
     int             iNCoils = usNCoils;
+    unsigned short  usBitOffset;
 
-    unsigned portSHORT usEndAddress = usAddress + usNCoils;
-
+    /* Check if we have registers mapped at this block. */
     if( ( usAddress >= REG_COILS_START ) &&
-        ( usEndAddress <= REG_COILS_START + REG_COILS_SIZE ) )
+        ( usAddress + usNCoils <= REG_COILS_START + REG_COILS_SIZE ) )
     {
-        while( usAddress < usEndAddress )
+        usBitOffset = usAddress - REG_COILS_START;
+        switch ( eMode )
         {
-            *pucRegBuffer++ = prvucGetCoilValue( usAddress );
-            usAddress += 8;
+                /* Read current values and pass to protocol stack. */
+            case MB_REG_READ:
+                while( iNCoils > 0 )
+                {
+                    *pucRegBuffer++ =
+                        xMBUtilGetBits( ucRegCoilsBuf, usBitOffset, 8 );
+                    iNCoils -= 8;
+                    usBitOffset += 8;
+                }
+                break;
+
+                /* Update current register values. */
+            case MB_REG_WRITE:
+                while( iNCoils > 0 )
+                {
+                    xMBUtilSetBits( ucRegCoilsBuf, usBitOffset, iNCoils % 8,
+                                    *pucRegBuffer++ );
+                    iNCoils -= 8;
+                }
+                break;
         }
+
     }
     else
     {
