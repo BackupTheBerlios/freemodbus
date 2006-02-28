@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: excoils.c,v 1.2 2006/02/28 22:35:09 wolti Exp $
+ * File: $Id: excoils.c,v 1.3 2006/02/28 22:40:59 wolti Exp $
  */
 
 /* ----------------------- Modbus includes ----------------------------------*/
@@ -28,7 +28,7 @@
 #define REG_COILS_SIZE      16
 
 /* ----------------------- Static variables ---------------------------------*/
-static unsigned char ucRegCoilsBuf[ REG_COILS_SIZE/8 ];
+static unsigned char ucRegCoilsBuf[REG_COILS_SIZE / 8];
 
 /* ----------------------- Start implementation -----------------------------*/
 int
@@ -66,7 +66,11 @@ eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
             case MB_REG_READ:
                 while( iNCoils > 0 )
                 {
-                    *pucRegBuffer++ = xMBUtilGetBits( ucRegCoilsBuf, usBitOffset, ( unsigned char )( iNCoils > 8 ? 8 : iNCoils ) );
+                    *pucRegBuffer++ =
+                        xMBUtilGetBits( ucRegCoilsBuf, usBitOffset,
+                                        ( unsigned char )( iNCoils >
+                                                           8 ? 8 :
+                                                           iNCoils ) );
                     iNCoils -= 8;
                     usBitOffset += 8;
                 }
@@ -76,7 +80,8 @@ eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
             case MB_REG_WRITE:
                 while( iNCoils > 0 )
                 {
-                    xMBUtilSetBits( ucRegCoilsBuf, usBitOffset, ( unsigned char )iNCoils % 8,
+                    xMBUtilSetBits( ucRegCoilsBuf, usBitOffset,
+                                    ( unsigned char )iNCoils % 8,
                                     *pucRegBuffer++ );
                     iNCoils -= 8;
                 }
