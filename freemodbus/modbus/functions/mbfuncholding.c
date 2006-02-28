@@ -60,7 +60,7 @@ eMBException
 eMBFuncWriteHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
 {
     USHORT          usRegAddress;
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen == ( MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN ) )
@@ -96,7 +96,7 @@ eMBFuncWriteMultipleHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
     USHORT          usRegCount;
     UCHAR           ucRegByteCount;
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen >= ( MB_PDU_FUNC_WRITE_MUL_SIZE_MIN + MB_PDU_SIZE_MIN ) )
@@ -112,7 +112,7 @@ eMBFuncWriteMultipleHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
 
         if( ( usRegCount >= 1 ) &&
             ( usRegCount <= MB_PDU_FUNC_WRITE_MUL_REGCNT_MAX ) &&
-            ( ucRegByteCount == 2 * usRegCount ) )
+            ( ucRegByteCount == ( UCHAR )( 2 * usRegCount ) ) )
         {
             /* Make callback to update the register values. */
             eRegStatus =
@@ -156,7 +156,7 @@ eMBFuncReadHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
     USHORT          usRegCount;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen == ( MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN ) )
@@ -183,7 +183,7 @@ eMBFuncReadHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
             *usLen += 1;
 
             /* Second byte in the response contain the number of bytes. */
-            *pucFrameCur++ = usRegCount * 2;
+            *pucFrameCur++ = ( UCHAR )( usRegCount * 2 );
             *usLen += 1;
 
             /* Make callback to fill the buffer. */

@@ -94,11 +94,11 @@ eMBFuncReadCoils( UCHAR * pucFrame, USHORT * usLen )
              * byte is only partially field with unused coils set to zero. */
             if( ( usCoilCount & 0x0007 ) != 0 )
             {
-                ucNBytes = ( UCHAR ) ( usCoilCount / 8 ) + 1;
+                ucNBytes = ( UCHAR )( usCoilCount / 8 + 1 );
             }
             else
             {
-                ucNBytes = ( UCHAR ) ( usCoilCount / 8 );
+                ucNBytes = ( UCHAR )( usCoilCount / 8 );
             }
             *pucFrameCur++ = ucNBytes;
             *usLen += 1;
@@ -141,7 +141,7 @@ eMBFuncWriteCoil( UCHAR * pucFrame, USHORT * usLen )
     USHORT          usRegAddress;
     UCHAR           ucBuf[2];
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen == ( MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN ) )
@@ -155,7 +155,7 @@ eMBFuncWriteCoil( UCHAR * pucFrame, USHORT * usLen )
               ( pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0x00 ) ) )
         {
             ucBuf[1] = 0;
-            if( pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] )
+            if( pucFrame[MB_PDU_FUNC_WRITE_VALUE_OFF] == 0xFF )
             {
                 ucBuf[0] = 1;
             }
@@ -197,7 +197,7 @@ eMBFuncWriteMultipleCoils( UCHAR * pucFrame, USHORT * usLen )
     UCHAR           ucByteCount;
     UCHAR           ucByteCountVerify;
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen > ( MB_PDU_FUNC_WRITE_SIZE + MB_PDU_SIZE_MIN ) )
@@ -214,11 +214,11 @@ eMBFuncWriteMultipleCoils( UCHAR * pucFrame, USHORT * usLen )
         /* Compute the number of expected bytes in the request. */
         if( ( usCoilCnt & 0x0007 ) != 0 )
         {
-            ucByteCountVerify = ( UCHAR ) ( usCoilCnt / 8 ) + 1;
+            ucByteCountVerify = ( UCHAR )( usCoilCnt / 8 + 1 );
         }
         else
         {
-            ucByteCountVerify = ( UCHAR ) ( usCoilCnt / 8 );
+            ucByteCountVerify = ( UCHAR )( usCoilCnt / 8 );
         }
 
         if( ( usCoilCnt >= 1 ) &&

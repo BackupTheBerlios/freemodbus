@@ -51,7 +51,7 @@ eMBFuncReadInputRegister( UCHAR * pucFrame, USHORT * usLen )
     USHORT          usRegCount;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen == ( MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN ) )
@@ -78,7 +78,7 @@ eMBFuncReadInputRegister( UCHAR * pucFrame, USHORT * usLen )
             *usLen += 1;
 
             /* Second byte in the response contain the number of bytes. */
-            *pucFrameCur++ = usRegCount * 2;
+            *pucFrameCur++ = ( UCHAR )( usRegCount * 2 );
             *usLen += 1;
 
             eRegStatus =

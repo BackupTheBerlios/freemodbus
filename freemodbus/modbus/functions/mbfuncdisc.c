@@ -53,7 +53,7 @@ eMBFuncReadDiscreteInputs( UCHAR * pucFrame, USHORT * usLen )
     UCHAR           ucNBytes;
     UCHAR          *pucFrameCur;
 
-    eMBException    eStatus = MB_ENOERR;
+    eMBException    eStatus = MB_EX_NONE;
     eMBErrorCode    eRegStatus;
 
     if( *usLen == ( MB_PDU_FUNC_READ_SIZE + MB_PDU_SIZE_MIN ) )
@@ -83,7 +83,7 @@ eMBFuncReadDiscreteInputs( UCHAR * pucFrame, USHORT * usLen )
              * byte is only partially field with unused coils set to zero. */
             if( ( usDiscreteCnt & 0x0007 ) != 0 )
             {
-                ucNBytes = ( UCHAR ) ( usDiscreteCnt / 8 ) + 1;
+                ucNBytes = ( UCHAR ) ( usDiscreteCnt / 8 + 1 );
             }
             else
             {
