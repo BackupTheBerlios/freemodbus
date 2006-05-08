@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: excoils.c,v 1.3 2006/02/28 22:40:59 wolti Exp $
+ * File: $Id: excoils.c,v 1.4 2006/05/08 21:24:00 wolti Exp $
  */
 
 /* ----------------------- Modbus includes ----------------------------------*/
@@ -43,7 +43,7 @@ main( void )
     for( ;; )
     {
         /* Call the main polling loop of the Modbus protocol stack. */
-        ( void )eMBPool(  );
+        ( void )eMBPoll(  );
     }
 }
 
