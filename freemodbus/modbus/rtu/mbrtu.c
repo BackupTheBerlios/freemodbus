@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbrtu.c,v 1.7 2006/05/13 12:38:08 wolti Exp $
+  * File: $Id: mbrtu.c,v 1.8 2006/06/15 15:17:52 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -72,7 +72,7 @@ eMBErrorCode
 eMBRTUInit( UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
-    USHORT          usTimerT35_50us;
+    ULONG           usTimerT35_50us;
 
     ENTER_CRITICAL_SECTION(  );
 
@@ -95,7 +95,7 @@ eMBRTUInit( UCHAR ucSlaveAddress, ULONG ulBaudRate, eMBParity eParity )
          */
         usTimerT35_50us = ( 7UL * 220000UL ) / ( 2UL * ulBaudRate );
     }
-    if( xMBPortTimersInit( usTimerT35_50us ) != TRUE )
+    if( xMBPortTimersInit( ( USHORT) usTimerT35_50us ) != TRUE )
     {
         eStatus = MB_EPORTERR;
     }
