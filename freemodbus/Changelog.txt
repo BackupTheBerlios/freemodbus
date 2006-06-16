@@ -1,4 +1,11 @@
 
+2006-06-16 Christian Walter <wolti@sil.at>
+ Notes: The new version includes a new port for the
+   Win32 platform
+
+ Detailed notes:
+   - FEATURES: added Win32 platform
+
 2006-05-14 Christian Walter <wolti@sil.at>
  Notes: The new version includes a new port for the
    Freescale MCF5235 processor.
