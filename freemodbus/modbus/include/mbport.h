@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbport.h,v 1.10 2006/06/17 00:09:33 wolti Exp $
+  * File: $Id: mbport.h,v 1.11 2006/06/17 00:25:55 wolti Exp $
   */
 
 #ifndef _MB_PORT_H
@@ -62,7 +62,7 @@ BOOL            xMBPortEventGet( /*@out@*/ eMBEventType * eEvent );
 BOOL            xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate, 
 								   UCHAR ucDataBits, eMBParity eParity );
 
-void			xMBPortSerialClose( );
+void			xMBPortSerialClose( void );
 
 void            vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable );
 
@@ -73,7 +73,7 @@ INLINE BOOL     xMBPortSerialPutByte( CHAR ucByte );
 /* ----------------------- Timers functions ---------------------------------*/
 BOOL            xMBPortTimersInit( USHORT usTim1Timerout100us );
 
-void			xMBPortTimersClose( );
+void			xMBPortTimersClose( void );
 
 INLINE void     vMBPortTimersEnable( void );
 
