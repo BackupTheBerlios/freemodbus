@@ -1,7 +1,6 @@
 /*
  * FreeModbus Libary: Win32 Demo Application
  * Copyright (C) 2006 Christian Walter <wolti@sil.at>
- * Parts of crt0.S Copyright (c) 1995, 1996, 1998 Cygnus Support
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: stdafx.h,v 1.2 2006/06/18 13:00:30 wolti Exp $
+ * File: $Id: stdafx.h,v 1.3 2006/06/18 13:03:54 wolti Exp $
  */
 
 #pragma once
