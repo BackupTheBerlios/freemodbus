@@ -17,7 +17,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: freemodbus.cpp,v 1.2 2006/06/17 00:15:36 wolti Exp $
+ * File: $Id: freemodbus.cpp,v 1.3 2006/06/18 13:00:30 wolti Exp $
  */
 
 #include "stdafx.h"
@@ -37,15 +37,15 @@
 /* ----------------------- Static variables ---------------------------------*/
 static USHORT   usRegInputStart = REG_INPUT_START;
 static USHORT   usRegInputBuf[REG_INPUT_NREGS];
-static USHORT	usRegHoldingStart = REG_HOLDING_START;
-static USHORT	usRegHoldingBuf[REG_HOLDING_NREGS];
+static USHORT   usRegHoldingStart = REG_HOLDING_START;
+static USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
 
 int
 _tmain( int argc, _TCHAR * argv[] )
 {
     int             iExitCode;
-	TCHAR           cCh;
-	BOOL			bDoExit;
+    TCHAR           cCh;
+    BOOL            bDoExit;
 
     const UCHAR     ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
 
@@ -62,50 +62,53 @@ _tmain( int argc, _TCHAR * argv[] )
     }
     else if( xMBPortStartPoolingThread(  ) != MB_ENOERR )
     {
-        _ftprintf( stderr, _T( "%s: can't start pooling thread!\r\n" ),
-                   PROG );
+        _ftprintf( stderr, _T( "%s: can't start pooling thread!\r\n" ), PROG );
         iExitCode = EXIT_FAILURE;
     }
     else
     {
-		_tprintf( _T( "Type 'q' for quit or 'h' for help!\r\n") );
-		bDoExit = FALSE;
-		do {
-			_tprintf( _T( "> " ) );
-			cCh = _gettchar();
-			switch( cCh )
-			{
-			case _TCHAR('q'):
-				bDoExit = TRUE;
-				break;
-			case _TCHAR('d'):
-				xMBPortStopPoolingThread();
-				break;
-			case _TCHAR('e'):
-				xMBPortStartPoolingThread();
-				break;
-			case _TCHAR('h'):
-				_tprintf( _T( "FreeModbus demo application help:\r\n") );
-				_tprintf( _T( "  'd' ... disable protocol stack.\r\n") );
-				_tprintf( _T( "  'e' ... enabled the protocol stack\r\n") );
-				_tprintf( _T( "  'q' ... quit applicationr\r\n") );
-				_tprintf( _T( "  'h' ... this information\r\n") );
-				_tprintf( _T( "\r\n") );
-				_tprintf( _T( "Copyright 2006 Christian Walter <wolti@sil.at>\r\n") );
-				break;
-			default:
-				_tprintf( _T( "illegal command '%c'!\r\n" ), cCh );
-				break;
-			}
+        _tprintf( _T( "Type 'q' for quit or 'h' for help!\r\n" ) );
+        bDoExit = FALSE;
+        do
+        {
+            _tprintf( _T( "> " ) );
+            cCh = _gettchar(  );
+            switch ( cCh )
+            {
+                case _TCHAR( 'q' ):
+                    bDoExit = TRUE;
+                    break;
+                case _TCHAR( 'd' ):
+                    xMBPortStopPoolingThread(  );
+                    break;
+                case _TCHAR( 'e' ):
+                    xMBPortStartPoolingThread(  );
+                    break;
+                case _TCHAR( 'h' ):
+                    _tprintf( _T( "FreeModbus demo application help:\r\n" ) );
+                    _tprintf( _T( "  'd' ... disable protocol stack.\r\n" ) );
+                    _tprintf( _T
+                              ( "  'e' ... enabled the protocol stack\r\n" ) );
+                    _tprintf( _T( "  'q' ... quit applicationr\r\n" ) );
+                    _tprintf( _T( "  'h' ... this information\r\n" ) );
+                    _tprintf( _T( "\r\n" ) );
+                    _tprintf( _T
+                              ( "Copyright 2006 Christian Walter <wolti@sil.at>\r\n" ) );
+                    break;
+                default:
+                    _tprintf( _T( "illegal command '%c'!\r\n" ), cCh );
+                    break;
+            }
 
-			/* eat up everything untill return character. */
-			while( _gettchar() != _TCHAR('\n') );
-        } while( !bDoExit );
-		/* Shut down pooling thread in case not already done. */
-		(void)xMBPortStopPoolingThread(  );
+            /* eat up everything untill return character. */
+            while( _gettchar(  ) != _TCHAR( '\n' ) );
+        }
+        while( !bDoExit );
+        /* Shut down pooling thread in case not already done. */
+        ( void )xMBPortStopPoolingThread(  );
 
-		/* Release hardware resources. */
-		(void)eMBClose();
+        /* Release hardware resources. */
+        ( void )eMBClose(  );
         iExitCode = EXIT_SUCCESS;
     }
     return iExitCode;
@@ -156,10 +159,10 @@ eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs,
             case MB_REG_READ:
                 while( usNRegs > 0 )
                 {
-                    *pucRegBuffer++ = 
-						( UCHAR )( usRegHoldingBuf[iRegIndex] >> 8 );
-                    *pucRegBuffer++ = 
-						( UCHAR )( usRegHoldingBuf[iRegIndex] & 0xFF );
+                    *pucRegBuffer++ =
+                        ( UCHAR ) ( usRegHoldingBuf[iRegIndex] >> 8 );
+                    *pucRegBuffer++ =
+                        ( UCHAR ) ( usRegHoldingBuf[iRegIndex] & 0xFF );
                     iRegIndex++;
                     usNRegs--;
                 }

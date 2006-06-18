@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portpoll.c,v 1.2 2006/06/17 00:16:31 wolti Exp $
+ * File: $Id: portpoll.c,v 1.3 2006/06/18 13:00:30 wolti Exp $
  */
 
 #include <windows.h>
@@ -71,7 +71,8 @@ xMBPortStartPoolingThread(  )
     }
     else
     {
-        TRACEC( _T( "CFreeModbusThread::start: waiting for protocol stack to become ready\r\n" ) );
+        TRACEC( _T
+                ( "CFreeModbusThread::start: waiting for protocol stack to become ready\r\n" ) );
 
         dwWaitResult = WaitForSingleObject( hEvents, INFINITE );
         assert( dwWaitResult == WAIT_OBJECT_0 );
@@ -99,7 +100,8 @@ xMBPortStopPoolingThread(  )
     {
         prveMBPortSetThreadState( SHUTDOWN );
 
-        TRACEC ( _T ( "CFreeModbusThread::start: waiting for protocol to shutdown\r\n" ) );
+        TRACEC( _T
+                ( "CFreeModbusThread::start: waiting for protocol to shutdown\r\n" ) );
         dwWaitResult = WaitForSingleObject( hEvents, INFINITE );
         assert( dwWaitResult == WAIT_OBJECT_0 );
 

@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portserial.c,v 1.2 2006/06/17 00:17:45 wolti Exp $
+ * File: $Id: portserial.c,v 1.3 2006/06/18 13:00:30 wolti Exp $
  */
 
 #include <windows.h>
@@ -30,9 +30,9 @@
 
 /* ----------------------- Defines  -----------------------------------------*/
 #if MB_ASCII_ENABLED == 1
-#define	BUF_SIZE	513				/* must hold a complete ASCII frame. */
+#define	BUF_SIZE	513     /* must hold a complete ASCII frame. */
 #else
-#define	BUF_SIZE	256				/* must hold a complete RTU frame. */
+#define	BUF_SIZE	256     /* must hold a complete RTU frame. */
 #endif
 
 /* ----------------------- Static variables ---------------------------------*/
@@ -269,7 +269,8 @@ xMBPortSerialPoll(  )
             ( g_hSerial, &ucBuffer[0], uiTxBufferPos, &dwBytesWritten, NULL )
             || ( dwBytesWritten != uiTxBufferPos ) )
         {
-            ERRORC( L"vMBPortSerialPoll: WriteFile failed: ", GetLastError(  ) );
+            ERRORC( L"vMBPortSerialPoll: WriteFile failed: ",
+                    GetLastError(  ) );
             bStatus = FALSE;
         }
     }
