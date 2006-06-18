@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbport.h,v 1.11 2006/06/17 00:25:55 wolti Exp $
+  * File: $Id: mbport.h,v 1.12 2006/06/18 09:54:53 wolti Exp $
   */
 
 #ifndef _MB_PORT_H
@@ -25,7 +25,6 @@
 #ifdef __cplusplus
 PR_BEGIN_EXTERN_C
 #endif
-
 /* ----------------------- Type definitions ---------------------------------*/
 
 typedef enum
@@ -55,14 +54,14 @@ BOOL            xMBPortEventInit( void );
 
 BOOL            xMBPortEventPost( eMBEventType eEvent );
 
-BOOL            xMBPortEventGet( /*@out@*/ eMBEventType * eEvent );
+BOOL            xMBPortEventGet(  /*@out@ */ eMBEventType * eEvent );
 
 /* ----------------------- Serial port functions ----------------------------*/
 
-BOOL            xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate, 
-								   UCHAR ucDataBits, eMBParity eParity );
+BOOL            xMBPortSerialInit( UCHAR ucPort, ULONG ulBaudRate,
+                                   UCHAR ucDataBits, eMBParity eParity );
 
-void			xMBPortSerialClose( void );
+void            xMBPortSerialClose( void );
 
 void            vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable );
 
@@ -73,7 +72,7 @@ INLINE BOOL     xMBPortSerialPutByte( CHAR ucByte );
 /* ----------------------- Timers functions ---------------------------------*/
 BOOL            xMBPortTimersInit( USHORT usTim1Timerout100us );
 
-void			xMBPortTimersClose( void );
+void            xMBPortTimersClose( void );
 
 INLINE void     vMBPortTimersEnable( void );
 
@@ -102,5 +101,4 @@ extern          BOOL( *pxMBPortCBTimerExpired ) ( void );
 #ifdef __cplusplus
 PR_END_EXTERN_C
 #endif
-
 #endif

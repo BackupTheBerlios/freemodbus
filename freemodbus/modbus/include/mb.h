@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.h,v 1.11 2006/06/17 00:12:32 wolti Exp $
+  * File: $Id: mb.h,v 1.12 2006/06/18 09:54:53 wolti Exp $
   */
 
 #ifndef _MB_H
@@ -27,9 +27,7 @@
 #ifdef __cplusplus
 PR_BEGIN_EXTERN_C
 #endif
-
 #include "mbport.h"
-
 /*! \defgroup modbus Modbus
  * \code #include "mb.h" \endcode
  *
@@ -55,7 +53,6 @@ PR_BEGIN_EXTERN_C
  * }
  * \endcode
  */
-
 /* ----------------------- Type definitions ---------------------------------*/
 /*! \ingroup modbus
  * \brief Modbus serial transmission modes (RTU/ASCII).
@@ -64,7 +61,7 @@ PR_BEGIN_EXTERN_C
  * is faster but has more hardware requirements and requires a network with
  * a low jitter. ASCII is slower and more reliable on slower links (E.g. modems)
  */
-typedef enum
+    typedef enum
 {
     MB_RTU,                     /*!< RTU transmission mode. */
     MB_ASCII                    /*!< ASCII transmission mode. */
@@ -145,7 +142,7 @@ eMBErrorCode    eMBInit( eMBMode eMode, UCHAR ucSlaveAddress,
  *   If the protocol stack is not in the disabled state it returns
  *   eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode	eMBClose( void );
+eMBErrorCode    eMBClose( void );
 
 /*! \ingroup modbus
  * \brief Enable the Modbus protocol stack.
@@ -168,7 +165,7 @@ eMBErrorCode    eMBEnable( void );
  *  eMBErrorCode::MB_ENOERR. If it was not in the enabled state it returns
  *  eMBErrorCode::MB_EILLSTATE.
  */
-eMBErrorCode	eMBDisable( void );
+eMBErrorCode    eMBDisable( void );
 
 /*! \ingroup modbus
  * \brief The main pooling loop of the Modbus protocol stack.
@@ -203,7 +200,8 @@ eMBErrorCode    eMBPoll( void );
  *   it returns eMBErrorCode::MB_ENOERR.
  */
 eMBErrorCode    eMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
-                               UCHAR const *pucAdditional, USHORT usAdditionalLen);
+                               UCHAR const *pucAdditional,
+                               USHORT usAdditionalLen );
 
 /* ----------------------- Callback -----------------------------------------*/
 
@@ -354,5 +352,4 @@ eMBErrorCode    eMBRegDiscreteCB( UCHAR * pucRegBuffer, USHORT usAddress,
 #ifdef __cplusplus
 PR_END_EXTERN_C
 #endif
-
 #endif

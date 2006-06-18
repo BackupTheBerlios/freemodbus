@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbframe.h,v 1.6 2006/06/17 00:11:18 wolti Exp $
+  * File: $Id: mbframe.h,v 1.7 2006/06/18 09:54:53 wolti Exp $
   */
 
 #ifndef _MB_FRAME_H
@@ -25,7 +25,6 @@
 #ifdef __cplusplus
 PR_BEGIN_EXTERN_C
 #endif
-
 /*!
  * Constants which defines the format of a modbus frame.
  *
@@ -48,18 +47,14 @@ PR_BEGIN_EXTERN_C
  * (3') ... MB_PDU_DATA_OFF     = 1
  * </code>
  */
-
 /* ----------------------- Defines ------------------------------------------*/
-
 #define MB_PDU_SIZE_MAX     253 /*!< Maximum size of a PDU. */
 #define MB_PDU_SIZE_MIN     1   /*!< Function Code */
 #define MB_PDU_FUNC_OFF     0   /*!< Offset of function code in PDU. */
 #define MB_PDU_DATA_OFF     1   /*!< Offset for response data in PDU. */
-
 /* ----------------------- Type definitions ---------------------------------*/
-
-typedef         void( *peMBFrameStart ) ( void );
-typedef         void( *peMBFrameStop ) ( void );
+typedef void    ( *peMBFrameStart ) ( void );
+typedef void    ( *peMBFrameStop ) ( void );
 
 typedef         eMBErrorCode( *peMBFrameReceive ) ( UCHAR * pucRcvAddress,
                                                     UCHAR ** pucFrame,
@@ -69,13 +64,12 @@ typedef         eMBErrorCode( *peMBFrameSend ) ( UCHAR slaveAddress,
                                                  const UCHAR * pucFrame,
                                                  USHORT usLength );
 
-typedef         eMBErrorCode( *peMBFrameInit ) ( UCHAR ucPort, 
-												 UCHAR slaveAddress,
+typedef         eMBErrorCode( *peMBFrameInit ) ( UCHAR ucPort,
+                                                 UCHAR slaveAddress,
                                                  ULONG ulBaudRate,
                                                  eMBParity eParity );
 
 #ifdef __cplusplus
 PR_END_EXTERN_C
 #endif
-
 #endif

@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.12 2006/06/17 00:13:50 wolti Exp $
+  * File: $Id: mb.c,v 1.13 2006/06/18 09:55:26 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -42,11 +42,12 @@
 /* ----------------------- Static variables ---------------------------------*/
 static UCHAR   *ucMBFrame;
 static UCHAR    ucMBAddress;
-static enum	{
-	STATE_ENABLED,
-	STATE_DISABLED,
-	STATE_NOT_INITIALIZED
-}	eMBState = STATE_NOT_INITIALIZED;
+static enum
+{
+    STATE_ENABLED,
+    STATE_DISABLED,
+    STATE_NOT_INITIALIZED
+} eMBState = STATE_NOT_INITIALIZED;
 
 /* Functions pointer which are initialized in eMBInit( ). Depending on the
  * mode (RTU or ASCII) the are set to the correct implementations.
@@ -113,7 +114,7 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
     /* check preconditions */
     if( ( ucSlaveAddress == MB_ADDRESS_BROADCAST ) ||
         ( ucSlaveAddress < MB_ADDRESS_MIN ) ||
-	    ( ucSlaveAddress > MB_ADDRESS_MAX ) )
+        ( ucSlaveAddress > MB_ADDRESS_MAX ) )
     {
         return MB_EINVAL;
     }
@@ -124,7 +125,7 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
         case MB_RTU:
             peMBFrameInitCur = eMBRTUInit;
             peMBFrameStartCur = eMBRTUStart;
-			peMBFrameStopCur = eMBRTUStop;
+            peMBFrameStopCur = eMBRTUStop;
             peMBFrameSendCur = eMBRTUSend;
             peMBFrameReceiveCur = eMBRTUReceive;
 
@@ -136,7 +137,7 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
 #if MB_ASCII_ENABLED > 0
             peMBFrameInitCur = eMBASCIIInit;
             peMBFrameStartCur = eMBASCIIStart;
-			peMBFrameStopCur = eMBASCIIStop;
+            peMBFrameStopCur = eMBASCIIStop;
             peMBFrameSendCur = eMBASCIISend;
             peMBFrameReceiveCur = eMBASCIIReceive;
 
@@ -148,50 +149,52 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
 #endif
     }
 
-    if( ( eStatus = peMBFrameInitCur( ucSlaveAddress, ucPort, ulBaudRate, eParity ) )  != MB_ENOERR )
-	{
-		/* initialization failed. */
-	}
-	else if ( !xMBPortEventInit() )
-	{
-		/* port dependent event module initalization failed. */
-		eStatus = MB_EPORTERR;
-	}
-	else 
-	{ 
-		eMBState = STATE_DISABLED;
-	}
+    if( ( eStatus = peMBFrameInitCur( ucSlaveAddress, ucPort, ulBaudRate,
+                                      eParity ) ) != MB_ENOERR )
+    {
+        /* initialization failed. */
+    }
+    else if( !xMBPortEventInit(  ) )
+    {
+        /* port dependent event module initalization failed. */
+        eStatus = MB_EPORTERR;
+    }
+    else
+    {
+        eMBState = STATE_DISABLED;
+    }
     return eStatus;
 }
 
-eMBErrorCode	
+eMBErrorCode
 eMBClose( void )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-	if( eMBState == STATE_DISABLED )
-	{
+    if( eMBState == STATE_DISABLED )
+    {
 #if MB_PORT_HAS_CLOSE == 1
-		xMBPortSerialClose( );
-		xMBPortTimersClose( );
+        xMBPortSerialClose(  );
+        xMBPortTimersClose(  );
 #endif
-	}
-	else
-	{
+    }
+    else
+    {
         eStatus = MB_EILLSTATE;
-	}
-	return eStatus;
+    }
+    return eStatus;
 }
+
 eMBErrorCode
 eMBEnable( void )
 {
     eMBErrorCode    eStatus = MB_ENOERR;
 
-	if( eMBState == STATE_DISABLED ) 
-	{
+    if( eMBState == STATE_DISABLED )
+    {
         /* Activate the protocol stack. */
         ( void )peMBFrameStartCur(  );
-		eMBState = STATE_ENABLED;
+        eMBState = STATE_ENABLED;
     }
     else
     {
@@ -203,18 +206,18 @@ eMBEnable( void )
 eMBErrorCode
 eMBDisable( void )
 {
-	eMBErrorCode	eStatus = MB_ENOERR;
+    eMBErrorCode    eStatus = MB_ENOERR;
 
-	if( eMBState == STATE_ENABLED )
-	{
-		( void )peMBFrameStopCur(  );
-		eMBState = STATE_DISABLED;
-	}
-	else
-	{
-		eStatus = MB_EILLSTATE;
-	}
-	return eStatus;
+    if( eMBState == STATE_ENABLED )
+    {
+        ( void )peMBFrameStopCur(  );
+        eMBState = STATE_DISABLED;
+    }
+    else
+    {
+        eStatus = MB_EILLSTATE;
+    }
+    return eStatus;
 }
 
 eMBErrorCode
@@ -229,10 +232,11 @@ eMBPoll(  )
     eMBErrorCode    eStatus = MB_ENOERR;
     eMBEventType    eEvent;
 
-	/* Check if the protocol stack is ready. */
-	if ( eMBState != STATE_ENABLED ) {
-		return MB_EILLSTATE;
-	}
+    /* Check if the protocol stack is ready. */
+    if( eMBState != STATE_ENABLED )
+    {
+        return MB_EILLSTATE;
+    }
 
     /* Check if there is a event available. If not return control to caller.
      * Otherwise we will handle the event. */
@@ -249,8 +253,8 @@ eMBPoll(  )
                 if( eStatus == MB_ENOERR )
                 {
                     /* Check if the frame is for us. If not ignore the frame. */
-                    if( ( ucRcvAddress == ucMBAddress )
-                        || ( ucRcvAddress == MB_ADDRESS_BROADCAST ) )
+                    if( ( ucRcvAddress == ucMBAddress ) ||
+                        ( ucRcvAddress == MB_ADDRESS_BROADCAST ) )
                     {
                         ( void )xMBPortEventPost( EV_EXECUTE );
                     }
@@ -267,8 +271,7 @@ eMBPoll(  )
                     {
                         break;
                     }
-                    else if( xFuncHandlers[i].ucFunctionCode ==
-                             ucFunctionCode )
+                    else if( xFuncHandlers[i].ucFunctionCode == ucFunctionCode )
                     {
                         eException =
                             xFuncHandlers[i].pxHandler( ucMBFrame, &usLength );

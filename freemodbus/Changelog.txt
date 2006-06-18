@@ -1,4 +1,12 @@
 
+2006-06-18 Christian Walter <wolti@sil.at>
+
+ Detailed notes:
+   - OTHER: while working on the Win32 port some linefeeds got
+       wrong. Also some source files used tabs instead of spaces.
+   - OTHER: prototypes for xMBUtilSetBits and xMBUtilGetBits fixed.
+       usNBits should be ucNBits by convention.
+
 2006-06-17 Christian Walter <wolti@sil.at>
 
  Notes: Fixed various bugs with the Win32 port
