@@ -1,4 +1,18 @@
 
+2006-06-25 Christian Walter <wolti@sil.at>
+
+ Notes: Initial work on a Modbus/TCP port is available. The port includes
+   an example for a Win32 port which uses the Winsock API.
+   
+ Detailed notes:
+   - FEATURES: added required functions to core protocol stack to support
+       a Modbus/TCP implementation.
+   - FEATURES: added a Win32 port for the Modbus/TCP core. The port is
+       currently limited to one concurrent client.
+   - OTHER: The implementation of eMBClose to shutdown the protocol stack
+       was changed to unify it with the new Modbus/TCP code. 
+   - 
+
 2006-06-18 Christian Walter <wolti@sil.at>
 
  Detailed notes:
