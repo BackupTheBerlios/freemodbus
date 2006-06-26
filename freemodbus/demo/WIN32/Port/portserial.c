@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portserial.c,v 1.4 2006/06/26 17:57:10 wolti Exp $
+ * File: $Id: portserial.c,v 1.5 2006/06/26 19:33:16 wolti Exp $
  */
 
 #include <windows.h>
@@ -241,7 +241,7 @@ xMBPortSerialPoll(  )
             }
             else if( dwBytesRead > 0 )
             {
-                vMBPortLog( MB_LOG_ERROR, _T( "SER-POLL" ),
+                vMBPortLog( MB_LOG_DEBUG, _T( "SER-POLL" ),
                             _T( "detected end of frame (t3.5 expired.)\r\n" ) );
                 for( i = 0; i < dwBytesRead; i++ )
                 {
