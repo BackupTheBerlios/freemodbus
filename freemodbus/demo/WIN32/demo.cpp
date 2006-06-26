@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: demo.cpp,v 1.2 2006/06/26 19:22:56 wolti Exp $
+ * File: $Id: demo.cpp,v 1.3 2006/06/26 19:23:40 wolti Exp $
  */
 
 #include "stdafx.h"
@@ -64,7 +64,7 @@ _tmain( int argc, _TCHAR * argv[] )
 
     const UCHAR     ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
 
-    if( eMBInit( MB_RTU, 0x0A, 33, 38400, MB_PAR_EVEN ) != MB_ENOERR )
+    if( eMBInit( MB_RTU, 0x0A, 1, 38400, MB_PAR_EVEN ) != MB_ENOERR )
     {
         _ftprintf( stderr, _T( "%s: can't initialize modbus stack!\r\n" ), PROG );
         iExitCode = EXIT_FAILURE;
