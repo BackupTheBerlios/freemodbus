@@ -1,4 +1,12 @@
 
+2006-06-26 (REL_0_7) Christian Walter <wolti@sil.at>
+ Notes: Changed the WIN32 serial port to better fit into the design.
+ 
+ Detailed notes:
+   - OTHER: Design of the WIN32 serial port changed. The polling function
+       for the serial device are now called from the event loop.
+   - OTHER: Debugging uses the same interface as the WIN32/TCP port.
+
 2006-06-25 Christian Walter <wolti@sil.at>
 
  Notes: Initial work on a Modbus/TCP port is available. The port includes
