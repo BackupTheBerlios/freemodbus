@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: demo.cpp,v 1.1 2006/06/26 17:57:22 wolti Exp $
+ * File: $Id: demo.cpp,v 1.2 2006/06/26 19:22:56 wolti Exp $
  */
 
 #include "stdafx.h"
@@ -128,12 +128,18 @@ _tmain( int argc, _TCHAR * argv[] )
                 _tprintf( _T( "Copyright 2006 Christian Walter <wolti@sil.at>\r\n" ) );
                 break;
             default:
-                _tprintf( _T( "illegal command '%c'!\r\n" ), cCh );
+                if( cCh != _TCHAR('\n') )
+                {
+                    _tprintf( _T( "illegal command '%c'!\r\n" ), cCh );
+                }
                 break;
             }
 
             /* eat up everything untill return character. */
-            while( _gettchar(  ) != _TCHAR( '\n' ) );
+            while( cCh != '\n' )
+            {
+                cCh = _gettchar(  );
+            }
         }
         while( !bDoExit );
 
@@ -173,7 +179,6 @@ DWORD           WINAPI
 dwPollingThread( LPVOID lpParameter )
 {
     eSetPollingThreadState( RUNNING );
-//    TRACEC( _T( "PoolingThread: signaling that main thread is ready.\r\n" ) );
 
     if( eMBEnable(  ) == MB_ENOERR )
     {
@@ -189,7 +194,6 @@ dwPollingThread( LPVOID lpParameter )
 
     eSetPollingThreadState( STOPPED );
 
-  //  TRACEC( _T( "PoolingThread: signaling that shutdown is finished.\r\n" ) );
     return 0;
 }
 
