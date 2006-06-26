@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: demo.cpp,v 1.1 2006/06/25 00:20:18 wolti Exp $
+ * File: $Id: demo.cpp,v 1.2 2006/06/26 19:24:07 wolti Exp $
  */
 
 #include "stdafx.h"
@@ -39,12 +39,22 @@ static USHORT   usRegInputBuf[REG_INPUT_NREGS];
 static USHORT   usRegHoldingStart = REG_HOLDING_START;
 static USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
 
-extern          "C"
+static HANDLE   hPollThread;
+static CRITICAL_SECTION hPollLock;
+static enum ThreadState
 {
-    BOOL            xMBPortTCPPool( void );
-    BOOL            xMBPortTCPInit( USHORT usTcpPort );
-}
+    STOPPED,
+    RUNNING,
+    SHUTDOWN
+} ePollThreadState;
 
+/* ----------------------- Static functions ---------------------------------*/
+static BOOL     bCreatePollingThread( void );
+static enum ThreadState eGetPollingThreadState( void );
+static void     eSetPollingThreadState( enum ThreadState eNewState );
+static DWORD WINAPI dwPollingThread( LPVOID lpParameter );
+
+/* ----------------------- Start implementation -----------------------------*/
 int
 _tmain( int argc, _TCHAR * argv[] )
 {
@@ -57,16 +67,147 @@ _tmain( int argc, _TCHAR * argv[] )
         _ftprintf( stderr, _T( "%s: can't initialize modbus stack!\r\n" ), PROG );
         iExitCode = EXIT_FAILURE;
     }
-    else if( eMBEnable(  ) != MB_ENOERR )
+    else
     {
-        _ftprintf( stderr, _T( "%s: can't enable modbus stack!\r\n" ), PROG );
-        iExitCode = EXIT_FAILURE;
-    }
-    for( ;; )
-    {
-        eMBPoll(  );
+        /* Create synchronization primitives and set the current state
+         * of the thread to STOPPED.
+         */
+        InitializeCriticalSection( &hPollLock );
+        eSetPollingThreadState( STOPPED );
+
+        /* CLI interface. */
+        _tprintf( _T( "Type 'q' for quit or 'h' for help!\r\n" ) );
+        bDoExit = FALSE;
+        do
+        {
+            _tprintf( _T( "> " ) );
+            cCh = _gettchar(  );
+            switch ( cCh )
+            {
+            case _TCHAR( 'q' ):
+                bDoExit = TRUE;
+                break;
+            case _TCHAR( 'd' ):
+                eSetPollingThreadState( SHUTDOWN );
+                break;
+            case _TCHAR( 'e' ):
+                if( bCreatePollingThread(  ) != TRUE )
+                {
+                    _tprintf( _T( "Can't start protocol stack! Already running?\r\n" ) );
+                }
+                break;
+            case _TCHAR( 's' ):
+                switch ( eGetPollingThreadState(  ) )
+                {
+                case RUNNING:
+                    _tprintf( _T( "Protocol stack is running.\r\n" ) );
+                    break;
+                case STOPPED:
+                    _tprintf( _T( "Protocol stack is stopped.\r\n" ) );
+                    break;
+                case SHUTDOWN:
+                    _tprintf( _T( "Protocol stack is shuting down.\r\n" ) );
+                    break;
+                }
+                break;
+            case _TCHAR( 'h' ):
+                _tprintf( _T( "FreeModbus demo application help:\r\n" ) );
+                _tprintf( _T( "  'd' ... disable protocol stack.\r\n" ) );
+                _tprintf( _T( "  'e' ... enabled the protocol stack\r\n" ) );
+                _tprintf( _T( "  's' ... show current status\r\n" ) );
+                _tprintf( _T( "  'q' ... quit applicationr\r\n" ) );
+                _tprintf( _T( "  'h' ... this information\r\n" ) );
+                _tprintf( _T( "\r\n" ) );
+                _tprintf( _T( "Copyright 2006 Christian Walter <wolti@sil.at>\r\n" ) );
+                break;
+            default:
+                if( cCh != _TCHAR('\n') )
+                {
+                    _tprintf( _T( "illegal command '%c'!\r\n" ), cCh );
+                }
+                break;
+            }
+
+            /* eat up everything untill return character. */
+            while( cCh != '\n' )
+            {
+                cCh = _gettchar(  );
+            }
+        }
+        while( !bDoExit );
+
+        /* Release hardware resources. */
+        ( void )eMBClose(  );
+        iExitCode = EXIT_SUCCESS;
     }
     return iExitCode;
+}
+
+BOOL
+bCreatePollingThread( void )
+{
+    BOOL            bResult;
+
+    if( eGetPollingThreadState(  ) == STOPPED )
+    {
+        if( ( hPollThread = CreateThread( NULL, 0, dwPollingThread, NULL, 0, NULL ) ) == NULL )
+        {
+            /* Can't create the polling thread. */
+            bResult = FALSE;
+        }
+        else
+        {
+            bResult = TRUE;
+        }
+    }
+    else
+    {
+        bResult = FALSE;
+    }
+
+    return bResult;
+}
+
+DWORD           WINAPI
+dwPollingThread( LPVOID lpParameter )
+{
+    eSetPollingThreadState( RUNNING );
+
+    if( eMBEnable(  ) == MB_ENOERR )
+    {
+        do
+        {
+            if( eMBPoll(  ) != MB_ENOERR )
+                break;
+        }
+        while( eGetPollingThreadState(  ) != SHUTDOWN );
+    }
+
+    ( void )eMBDisable(  );
+
+    eSetPollingThreadState( STOPPED );
+
+    return 0;
+}
+
+enum ThreadState
+eGetPollingThreadState(  )
+{
+    enum ThreadState eCurState;
+
+    EnterCriticalSection( &hPollLock );
+    eCurState = ePollThreadState;
+    LeaveCriticalSection( &hPollLock );
+
+    return eCurState;
+}
+
+void
+eSetPollingThreadState( enum ThreadState eNewState )
+{
+    EnterCriticalSection( &hPollLock );
+    ePollThreadState = eNewState;
+    LeaveCriticalSection( &hPollLock );
 }
 
 eMBErrorCode

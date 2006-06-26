@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: porttcp.c,v 1.1 2006/06/25 00:20:19 wolti Exp $
+ * File: $Id: porttcp.c,v 1.2 2006/06/26 19:24:07 wolti Exp $
  */
 
 /*
@@ -169,7 +169,7 @@ vMBTCPPortClose(  )
     for( i = 0; i < EV_NEVENTS; i++ )
     {
         if( xEvents[i] != WSA_INVALID_EVENT )
-            WSACloseEvent( xEvents[EV_CONNECTION] );
+            WSACloseEvent( xEvents[ i ] );
     }
     /* Close all client sockets. */
     if( xClientSocket != SOCKET_ERROR )
@@ -182,6 +182,16 @@ vMBTCPPortClose(  )
         closesocket( xListenSocket );
     }
     ( void )WSACleanup(  );
+}
+
+void
+vMBTCPPortDisable( void )
+{
+    /* Close all client sockets. */
+    if( xClientSocket != SOCKET_ERROR )
+    {
+        prvvMBPortReleaseClient(  );
+    }
 }
 
 /*! \ingroup port_win32tcp

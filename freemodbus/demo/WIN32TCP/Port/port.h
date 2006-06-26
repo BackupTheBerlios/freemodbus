@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: port.h,v 1.1 2006/06/25 00:20:19 wolti Exp $
+ * File: $Id: port.h,v 1.2 2006/06/26 19:24:07 wolti Exp $
  */
 
 #ifndef _PORT_H
@@ -60,12 +60,6 @@ typedef enum
 
 void            vMBPortLog( eMBPortLogLevel eLevel, const TCHAR * szModule, 
                             const TCHAR * szFmt, ... );
-
-void            vMBPortTimerPoll(  );
-BOOL            xMBPortSerialPoll(  );
-BOOL            xMBPortSerialSetTimeout( DWORD dwTimeoutMs );
-SHORT           xMBPortStartPoolingThread(  );
-SHORT           xMBPortStopPoolingThread(  );
 
 #ifdef __cplusplus
 PR_END_EXTERN_C
