@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbtcp.c,v 1.1 2006/06/25 00:06:07 wolti Exp $
+  * File: $Id: mbtcp.c,v 1.2 2006/06/26 19:27:04 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -88,6 +88,8 @@ eMBTCPStart( void )
 void
 eMBTCPStop( void )
 {
+    /* Make sure that no more clients are connected. */
+    vMBTCPPortDisable( );
 }
 
 eMBErrorCode

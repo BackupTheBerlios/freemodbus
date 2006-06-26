@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbport.h,v 1.13 2006/06/25 00:11:43 wolti Exp $
+  * File: $Id: mbport.h,v 1.14 2006/06/26 19:26:50 wolti Exp $
   */
 
 #ifndef _MB_PORT_H
@@ -25,6 +25,7 @@
 #ifdef __cplusplus
 PR_BEGIN_EXTERN_C
 #endif
+
 /* ----------------------- Type definitions ---------------------------------*/
 
 typedef enum
@@ -104,6 +105,8 @@ extern          BOOL( *pxMBPortCBTimerExpired ) ( void );
 BOOL            xMBTCPPortInit( USHORT usTCPPort );
 
 void            vMBTCPPortClose( void );
+
+void            vMBTCPPortDisable( void );
 
 BOOL            xMBTCPPortGetRequest( UCHAR **ppucMBTCPFrame, USHORT * usTCPLength );
 
