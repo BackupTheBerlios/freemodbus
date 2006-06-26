@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portevent.c,v 1.1 2006/06/16 00:13:39 wolti Exp $
+ * File: $Id: portevent.c,v 1.2 2006/06/26 17:57:10 wolti Exp $
  */
 
 /* ----------------------- Modbus includes ----------------------------------*/
@@ -53,6 +53,20 @@ xMBPortEventGet( eMBEventType * eEvent )
         *eEvent = eQueuedEvent;
         xEventInQueue = FALSE;
         xEventHappened = TRUE;
+    }
+    else
+    {        
+        /* Poll the serial device. The serial device timeouts if no
+         * characters have been received within for t3.5 during an
+         * active transmission or if nothing happens within a specified
+         * amount of time. Both timeouts are configured from the timer
+         * init functions.
+         */
+        ( void )xMBPortSerialPoll(  );  
+
+        /* Check if any of the timers have expired. */
+        vMBPortTimerPoll(  );
+     
     }
     return xEventHappened;
 }
