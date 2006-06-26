@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.14 2006/06/25 00:13:36 wolti Exp $
+  * File: $Id: mb.c,v 1.15 2006/06/26 18:54:28 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -42,6 +42,10 @@
 #endif
 #if MB_TCP_ENABLED == 1
 #include "mbtcp.h"
+#endif
+
+#ifndef MB_PORT_HAS_CLOSE
+#define MB_PORT_HAS_CLOSE 0
 #endif
 
 /* ----------------------- Static variables ---------------------------------*/
@@ -129,7 +133,6 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
     {
 #if MB_RTU_ENABLED > 0
     case MB_RTU:
-       peMBFrameInitCur = eMBRTUInit;
        pvMBFrameStartCur = eMBRTUStart;
        pvMBFrameStopCur = eMBRTUStop;
        peMBFrameSendCur = eMBRTUSend;
@@ -144,11 +147,10 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate,
 #endif
 #if MB_ASCII_ENABLED > 0
     case MB_ASCII:
-       peMBFrameInitCur = eMBASCIIInit;
        pvMBFrameStartCur = eMBASCIIStart;
        pvMBFrameStopCur = eMBASCIIStop;
        peMBFrameSendCur = eMBASCIISend;
-       peMBFrameReceiveCur = eMBSACIIReceive;
+       peMBFrameReceiveCur = eMBASCIIReceive;
        pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBPortClose : NULL;
        pxMBFrameCBByteReceived = xMBRTUReceiveFSM;
        pxMBFrameCBTransmitterEmpty = xMBRTUTransmitFSM;
