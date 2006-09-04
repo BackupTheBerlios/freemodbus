@@ -7,9 +7,9 @@ PROJECT = demo
 MCU = atmega168
 TARGET = demo
 
-CC=/cygdrive/c/WinAVR/bin/avr-gcc
-OBJCOPY=/cygdrive/c/WinAVR/bin/avr-objcopy
-
+CC=/opt/gcc-avr/bin/avr-gcc
+OBJCOPY=/opt/gcc-avr/bin/avr-objcopy
+AVRDUDE=/opt/gcc-avr/bin/avrdude
 
 ## Options common to compile, link and assembly rules
 COMMON = -mmcu=$(MCU)
@@ -85,7 +85,7 @@ $(TARGET).elf: $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS)
 	$(OBJCOPY) -h -S $< > $@
 
 flash:
-	avrdude -p m168 -c stk200 -U flash:w:$(TARGET).hex				
+	$(AVRDUDE) -p m168 -c stk200 -U flash:w:$(TARGET).hex				
 
 #size: ${TARGET}
 #	@echo
