@@ -1,0 +1,4 @@
+
+2006-09-04 (REL_1_0) Christian Walter <wolti@sil.at>:
+ Notes: Initial port of lwIP with PPP support for STR71x target finished
+
