@@ -288,7 +288,7 @@ u16 UART_9BitByteReceive(UART_TypeDef *UARTx, u16 *Data, u8 TimeOut)
 *******************************************************************************/
 u16 UART_DataReceive(UART_TypeDef *UARTx, u8 *Data, u8 DataLength, u8 TimeOut)
 {
-  u16 wStatus;
+  u16 wStatus = 0;
   while(DataLength--)
     wStatus=UART_ByteReceive(UARTx,Data++,TimeOut);
   return wStatus;
@@ -306,7 +306,7 @@ u16 UART_DataReceive(UART_TypeDef *UARTx, u8 *Data, u8 DataLength, u8 TimeOut)
 *******************************************************************************/
 u16 UART_9BitDataReceive(UART_TypeDef *UARTx, u16 *Data, u8 DataLength, u8 TimeOut)
 {
-  u16 wStatus;
+  u16 wStatus = 0;
   while(DataLength--)
     wStatus=UART_9BitByteReceive(UARTx,Data++,TimeOut);
   return wStatus;

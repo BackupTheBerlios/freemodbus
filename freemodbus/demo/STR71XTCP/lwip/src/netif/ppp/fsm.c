@@ -126,6 +126,7 @@ void fsm_init(fsm *f)
 void fsm_lowerup(fsm *f)
 {
 	int oldState = f->state;
+    ( void )oldState;
 
 	switch( f->state ){
 	case INITIAL:
@@ -160,7 +161,8 @@ void fsm_lowerup(fsm *f)
 void fsm_lowerdown(fsm *f)
 {
 	int oldState = f->state;
-	
+	( void )oldState;
+
 	switch( f->state ){
 	case CLOSED:
 		f->state = INITIAL;
@@ -207,7 +209,8 @@ void fsm_lowerdown(fsm *f)
 void fsm_open(fsm *f)
 {
 	int oldState = f->state;
-	
+	( void )oldState;
+
 	switch( f->state ){
 		case INITIAL:
 			f->state = STARTING;
@@ -251,7 +254,8 @@ void fsm_open(fsm *f)
 void fsm_close(fsm *f, char *reason)
 {
 	int oldState = f->state;
-	
+	( void )oldState;
+
 	f->term_reason = reason;
 	f->term_reason_len = (reason == NULL? 0: strlen(reason));
 	switch( f->state ){

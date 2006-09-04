@@ -325,6 +325,8 @@ do_newconn(struct api_msg_msg *msg)
       setup_tcp(msg->conn);
       break;
 #endif
+    default:
+      LWIP_ASSERT( "do_newconn: msg->conn->type unknown\n", 0 );
    }
    
   
@@ -575,6 +577,8 @@ do_disconnect(struct api_msg_msg *msg)
 #endif 
   case NETCONN_TCP:
     break;
+  default:
+    LWIP_ASSERT( "do_newconn: msg->conn->type unknown\n", 0 );
   }
   sys_mbox_post(msg->conn->mbox, NULL);
 }
@@ -644,6 +648,8 @@ do_accept(struct api_msg_msg *msg)
 #endif /* LWIP_UDP */
     case NETCONN_TCP:
       break;
+    default:
+      LWIP_ASSERT( "do_newconn: msg->conn->type unknown\n", 0 );
     }
   }
 }
@@ -669,6 +675,8 @@ do_send(struct api_msg_msg *msg)
 #endif /* LWIP_UDP */
     case NETCONN_TCP:
       break;
+    default:
+      LWIP_ASSERT( "do_newconn: msg->conn->type unknown\n", 0 );
     }
   }
   sys_mbox_post(msg->conn->mbox, NULL);
