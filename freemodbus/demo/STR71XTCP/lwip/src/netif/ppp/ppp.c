@@ -25,6 +25,10 @@
 ******************************************************************************
 * REVISION HISTORY
 *
+* 06-08-04 Christian Walter <wolti@sil.at>
+*   pppOpen code now checks if thread creation was successfull. If not returns
+*   an error.
+*   pppMain now correctly closes the thread if it exists.
 * 03-01-01 Marc Boucher <marc@mbsi.ca>
 *   Ported to lwIP.
 * 97-11-05 Guy Lancaster <lancasterg@acm.org>, Global Election Systems Inc.
@@ -425,22 +429,29 @@ int pppOpen(sio_fd_t fd, void (*linkStatusCB)(void *ctx, int errCode, void *arg)
         memset(pc->outACCM, 0, sizeof(ext_accm));
         pc->outACCM[15] = 0x60;
 
-	pc->linkStatusCB = linkStatusCB;
-	pc->linkStatusCtx = linkStatusCtx;
+        pc->linkStatusCB = linkStatusCB;
+        pc->linkStatusCtx = linkStatusCtx;
 
-	sys_thread_new(pppMain, (void*)pd, PPP_THREAD_PRIO);
-	if(!linkStatusCB) {
-		while(pd >= 0 && !pc->if_up) {
-			sys_msleep(500);
-			if (lcp_phase[pd] == PHASE_DEAD) {
-				pppClose(pd);
-				if (pc->errCode)
-					pd = pc->errCode;
-				else
-					pd = PPPERR_CONNECT;
-			}
-		}
-	}
+        if( sys_thread_new(pppMain, (void*)pd, PPP_THREAD_PRIO) != SYS_THREAD_NULL )
+        {
+            if(!linkStatusCB) {
+                while(pd >= 0 && !pc->if_up) {
+                    sys_msleep(500);
+                    if (lcp_phase[pd] == PHASE_DEAD) {
+                        pppClose(pd);
+                        if (pc->errCode)
+                            pd = pc->errCode;
+                        else
+                            pd = PPPERR_CONNECT;
+                    }
+                }
+            }
+        }
+        else
+        {
+            pc->openFlag = 0;
+            pd = PPPERR_ALLOC;
+        }
     }
     return pd;
 }
@@ -1158,7 +1169,7 @@ void
 pppMainWakeup(int pd)
 {
 	PPPDEBUG((LOG_DEBUG, "pppMainWakeup: unit %d\n", pd));
-	sio_read_abort(pppControl[pd].fd);
+	sio_read_abort( pppControl[pd].fd );
 }
 
 /* these callbacks are necessary because lcp_* functions
@@ -1202,6 +1213,7 @@ pppHupCB(void *arg)
  * to section 4 of RFC 1661: The Point-To-Point Protocol. */
 static void pppMain(void *arg)
 {
+    err_t   err;
     int pd = (int)arg;
     struct pbuf *p;
     PPPControl* pc;
@@ -1219,7 +1231,8 @@ static void pppMain(void *arg)
      * Start the connection and handle incoming events (packet or timeout).
      */
 	PPPDEBUG((LOG_INFO, "pppMain: unit %d: Connecting\n", pd));
-    tcpip_callback(pppStartCB, arg);
+    err = tcpip_callback(pppStartCB, arg);
+    LWIP_ASSERT( "pppMain: can't install callback handler\n", err == ERR_OK );
     while (lcp_phase[pd] != PHASE_DEAD) {
         if (pc->kill_link) {
 	    	PPPDEBUG((LOG_DEBUG, "pppMainWakeup: unit %d kill_link -> pppStopCB\n", pd));
@@ -1237,7 +1250,7 @@ static void pppMain(void *arg)
 		if(c > 0) {
 			pppInProc(pd, p->payload, c);
 		} else {
-		    PPPDEBUG((LOG_DEBUG, "pppMainWakeup: unit %d sio_read len=%d returned %d\n", pd, p->len, c));
+		    /* PPPDEBUG((LOG_DEBUG, "pppMainWakeup: unit %d sio_read len=%d returned %d\n", pd, p->len, c)); */
 		}
         }
     }
@@ -1250,6 +1263,10 @@ out:
 	    pc->linkStatusCB(pc->linkStatusCtx, pc->errCode ? pc->errCode : PPPERR_PROTOCOL, NULL);
 
     pc->openFlag = 0;
+
+    /* Remove this thread from the running ones. */
+    sys_arch_thread_remove( sys_arch_thread_current( ) );
+    LWIP_ASSERT( "pppMain: sys_arch_thread_remove did return\n", 0 );
 }
 
 static struct pbuf *pppSingleBuf(struct pbuf *p)

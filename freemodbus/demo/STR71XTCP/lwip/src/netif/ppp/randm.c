@@ -25,11 +25,15 @@
 ******************************************************************************
 * REVISION HISTORY
 *
+* 06-08-04 Christian Walter <wolti@sil.at>
+*   Fixed some compiler warnings.
 * 03-01-01 Marc Boucher <marc@mbsi.ca>
 *   Ported to lwIP.
 * 98-06-03 Guy Lancaster <lancasterg@acm.org>, Global Election Systems Inc.
 *   Extracted from avos.
 *****************************************************************************/
+
+#include <stdlib.h>
 
 #include "ppp.h"
 #if PPP_SUPPORT > 0

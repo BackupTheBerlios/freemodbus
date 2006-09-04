@@ -51,6 +51,7 @@
  */
  
 #include <string.h>
+#include <stdio.h>
  
 #include "ppp.h"
 #if PPP_SUPPORT > 0
