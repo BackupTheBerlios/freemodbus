@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portother.c,v 1.1 2006/09/04 01:41:49 wolti Exp $
+ * File: $Id: portother.c,v 1.2 2006/09/04 14:39:20 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -36,7 +36,7 @@ void
 prvvMBTCPLogFrame( UCHAR * pucMsg, UCHAR * pucFrame, USHORT usFrameLen )
 {
     int             i;
-    int             res;
+    int             res = 0;
     int             iBufPos = 0;
     size_t          iBufLeft = MB_FRAME_LOG_BUFSIZE;
     static CHAR     arcBuffer[MB_FRAME_LOG_BUFSIZE];
@@ -111,7 +111,6 @@ prvvMBTCPLogFrame( UCHAR * pucMsg, UCHAR * pucFrame, USHORT usFrameLen )
 }
 #endif
 
-#ifdef MB_TCP_DEBUG
 void
 vMBPortLog( eMBPortLogLevel eLevel, const CHAR * szModule, const CHAR * szFmt, ... )
 {
@@ -123,4 +122,3 @@ vMBPortLog( eMBPortLogLevel eLevel, const CHAR * szModule, const CHAR * szFmt, .
     vprintf( szFmt, args );
     va_end( args );
 }
-#endif

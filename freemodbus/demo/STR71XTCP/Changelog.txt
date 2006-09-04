@@ -1,4 +1,18 @@
 
 2006-09-04 (REL_1_0) Christian Walter <wolti@sil.at>:
+ Notes: Fixed some bugs for the STR71/lwIP port in the lwIP and 
+   system abstraction layer. In addition the FreeRTOS porting layer
+   for lwIP was enhanced.
+
+ Detailed notes:
+   - FEATURES: implemented function to remove running tasks.
+   - FEATURES: added new thread creation function in sys_arch.c which
+       allows specifing the stack size.
+   - BUGS: pppOpen defined in ppp.c does not check the return value of
+       sys_thread_new. If task creation fails the system crashes.
+   - BUGS: pppMain must not return - Instead it should remove its task
+       from the scheduler. 
+
+2006-09-04 (REL_1_0) Christian Walter <wolti@sil.at>:
  Notes: Initial port of lwIP with PPP support for STR71x target finished
 

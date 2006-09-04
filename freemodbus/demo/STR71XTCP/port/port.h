@@ -17,7 +17,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: port.h,v 1.1 2006/09/04 01:41:49 wolti Exp $
+  * File: $Id: port.h,v 1.2 2006/09/04 14:39:20 wolti Exp $
   */
 
 #ifndef _PORT_H
@@ -75,6 +75,7 @@ typedef enum
 #ifdef MB_TCP_DEBUG
 void            vMBPortLog( eMBPortLogLevel eLevel, const CHAR * szModule,
                             const CHAR * szFmt, ... );
+void            prvvMBTCPLogFrame( UCHAR * pucMsg, UCHAR * pucFrame, USHORT usFrameLen );
 #endif
 
 #ifdef __cplusplus

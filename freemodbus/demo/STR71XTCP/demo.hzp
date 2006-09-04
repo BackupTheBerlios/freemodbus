@@ -1,7 +1,7 @@
 <!DOCTYPE CrossStudio_Project_File>
 <solution version="1" Name="demo" >
   <project Name="demo" >
-    <configuration Target="STR711F" property_groups_file_path="$(StudioDir)/targets/ST_STR71x/propertyGroups.xml" linker_memory_map_file="$(StudioDir)/targets/ST_STR71x/ST_STR711F_MemoryMap.xml" c_preprocessor_definitions="GCC_STR71X" c_user_include_directories=".;port;freertos/include;lwip/src/include;lwip/src/include/ipv4;lwip/src/netif;lwip/contrib/port/FreeRTOS/STR71X;../../modbus/include/;../../modbus/tcp;library/include" project_directory="" link_include_startup_code="No" project_type="Executable" Name="Common" arm_linker_heap_size="16384" />
+    <configuration Target="STR711F" property_groups_file_path="$(StudioDir)/targets/ST_STR71x/propertyGroups.xml" linker_memory_map_file="$(StudioDir)/targets/ST_STR71x/ST_STR711F_MemoryMap.xml" c_preprocessor_definitions="GCC_STR71X" c_user_include_directories=".;port;freertos/include;lwip/src/include;lwip/src/include/ipv4;lwip/src/netif;lwip/contrib/port/FreeRTOS/STR71X;../../modbus/include/;../../modbus/tcp;library/include" project_directory="" link_include_startup_code="No" project_type="Executable" c_additional_options="-Wall" Name="Common" arm_linker_heap_size="16384" />
     <configuration target_reset_script="RAMReset()" Name="RAM" />
     <configuration arm_target_flash_loader_file_path="$(StudioDir)/targets/ST_STR71x/Release/Loader.exe" target_reset_script="FLASHReset()" Name="Flash" />
     <folder Name="System Files" >
@@ -111,7 +111,9 @@
       <folder Name="core" >
         <file file_name="lwip/src/core/inet.c" Name="inet.c" />
         <file file_name="lwip/src/core/mem.c" Name="mem.c" />
-        <file file_name="lwip/src/core/memp.c" Name="memp.c" />
+        <file file_name="lwip/src/core/memp.c" Name="memp.c" >
+          <configuration asm_additional_options="c" Name="ARM Flash Release" />
+        </file>
         <file file_name="lwip/src/core/netif.c" Name="netif.c" />
         <file file_name="lwip/src/core/pbuf.c" Name="pbuf.c" />
         <file file_name="lwip/src/core/raw.c" Name="raw.c" />

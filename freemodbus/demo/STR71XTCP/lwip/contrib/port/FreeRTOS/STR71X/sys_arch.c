@@ -30,7 +30,7 @@
  * Author: Adam Dunkels <adam@sics.se>
  * Modifcations: Christian Walter <wolti@sil.at>
  *
- * $Id: sys_arch.c,v 1.2 2006/09/04 12:40:21 wolti Exp $
+ * $Id: sys_arch.c,v 1.3 2006/09/04 14:39:20 wolti Exp $
  */
 
 /* ------------------------ System includes ------------------------------- */
@@ -93,12 +93,13 @@ int             putchar( int c );
 sys_tcb_t      *sys_thread_current( void );
 
 /* ------------------------ Static variables ------------------------------ */
-static sys_tcb_t *tasks;
+static sys_tcb_t *tasks = NULL;
 
 /* ------------------------ Start implementation -------------------------- */
 void
 sys_init( void )
 {
+    LWIP_ASSERT( "sys_init: not called first\r\n", tasks == NULL );
     tasks = NULL;
 }
 
@@ -215,7 +216,11 @@ sys_arch_thread_new( void ( *thread ) ( void *arg ), void *arg, int prio, size_t
     /* We are called the first time. Initialize it. */
     if( p == NULL )
     {
-        p = tasks = pvPortMalloc( sizeof( sys_tcb_t ) );
+        p = pvPortMalloc( sizeof( sys_tcb_t ) );
+        if( p != NULL )
+        {
+            tasks = p;
+        }
     }
     else
     {

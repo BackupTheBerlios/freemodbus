@@ -1,1 +1,1 @@
-../../tools/linux/modpoll -m rtu -a 10 -b 38400 -d 8 -s 1 -p even /dev/ttyUSB0
+../../tools/linux/modpoll -m tcp 10.0.10.2 -r 1000 -t 3:int 

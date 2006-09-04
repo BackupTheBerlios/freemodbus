@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: porttcp.c,v 1.1 2006/09/04 01:41:49 wolti Exp $
+ * File: $Id: porttcp.c,v 1.2 2006/09/04 14:39:20 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -117,6 +117,7 @@ prvvMBPortReleaseClient( struct tcp_pcb *pxPCB )
         {
             tcp_abort( pxPCB );
         }
+        vPortEnterCritical(  );
         if( pxPCB == pxPCBClient )
         {
 #ifdef MB_TCP_DEBUG
@@ -131,6 +132,7 @@ prvvMBPortReleaseClient( struct tcp_pcb *pxPCB )
         {
             pxPCBListen = NULL;
         }
+        vPortExitCritical(  );
     }
 }
 void
@@ -220,11 +222,11 @@ prvxMBTCPPortReceive( void *pvArg, struct tcp_pcb *pxPCB, struct pbuf *p, err_t 
 {
     USHORT          usLength;
 
-    err_t           error;
+    err_t           error = xErr;
 
-    if( xErr != ERR_OK )
+    if( error != ERR_OK )
     {
-        return xErr;
+        return error;
     }
 
     /* If pbuf is NULL then remote end has closed connection. */

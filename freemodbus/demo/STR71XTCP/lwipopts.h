@@ -38,10 +38,8 @@
 #define SYS_LIGHTWEIGHT_PROT    1
 #define TCPIP_THREAD_PRIO       3
 #define LWIP_PROVIDE_ERRNO      0
-#define LWIP_DEBUG              1
+#define LWIP_DEBUG              0
 #define DBG_TYPES_ON            ( DBG_LEVEL_WARNING | DBG_LEVEL_SEVERE | DBG_LEVEL_SERIOUS )
-#define FEC_DEBUG               ( DBG_LEVEL_WARNING | DBG_ON )
-//#define PPP_DEBUG               ( BDG_LEVEL_WARNING | DBG_ON )
 
 /* ------------------------ Memory options -------------------------------- */
 /* MEM_ALIGNMENT: should be set to the alignment of the CPU for which
@@ -62,7 +60,7 @@ a lot of data that needs to be copied, this should be set high. */
 #define MEMP_NUM_UDP_PCB        4
 /* MEMP_NUM_TCP_PCB: the number of simulatenously active TCP
    connections. */
-#define MEMP_NUM_TCP_PCB        8
+#define MEMP_NUM_TCP_PCB        4
 /* MEMP_NUM_TCP_PCB_LISTEN: the number of listening TCP
    connections. */
 #define MEMP_NUM_TCP_PCB_LISTEN 8
@@ -76,24 +74,24 @@ a lot of data that needs to be copied, this should be set high. */
 /* The following four are used only with the sequential API and can be
    set to 0 if the application only will use the raw API. */
 /* MEMP_NUM_NETBUF: the number of struct netbufs. */
-#define MEMP_NUM_NETBUF         4
+#define MEMP_NUM_NETBUF         0
 /* MEMP_NUM_NETCONN: the number of struct netconns. */
-#define MEMP_NUM_NETCONN        4
+#define MEMP_NUM_NETCONN        0
 /* MEMP_NUM_APIMSG: the number of struct api_msg, used for
    communication between the TCP/IP stack and the sequential
    programs. */
-#define MEMP_NUM_API_MSG        8
+#define MEMP_NUM_API_MSG        0
 /* MEMP_NUM_TCPIPMSG: the number of struct tcpip_msg, which is used
    for sequential API communication and incoming packets. Used in
    src/api/tcpip.c. */
-#define MEMP_NUM_TCPIP_MSG      8
+#define MEMP_NUM_TCPIP_MSG      4
 
 /* ---------- Pbuf options ---------- */
 /* PBUF_POOL_SIZE: the number of buffers in the pbuf pool. */
-#define PBUF_POOL_SIZE          32
+#define PBUF_POOL_SIZE          8
 
 /* PBUF_POOL_BUFSIZE: the size of each pbuf in the pbuf pool. */
-#define PBUF_POOL_BUFSIZE       512
+#define PBUF_POOL_BUFSIZE       256
 
 /* PBUF_LINK_HLEN: the number of bytes that should be allocated for a
    link level header. */
@@ -115,7 +113,7 @@ a lot of data that needs to be copied, this should be set high. */
 
 /* TCP sender buffer space (pbufs). This must be at least = 2 *
    TCP_SND_BUF/TCP_MSS for things to work. */
-#define TCP_SND_QUEUELEN        ( 6 * TCP_SND_BUF/TCP_MSS )
+#define TCP_SND_QUEUELEN        ( 2 * TCP_SND_BUF/TCP_MSS )
 
 /* TCP receive window. */
 #define TCP_WND                 512
@@ -155,11 +153,12 @@ a lot of data that needs to be copied, this should be set high. */
 #define DHCP_DOES_ARP_CHECK     1
 
 /* ------------------------ UDP options ----------------------------------- */
-#define LWIP_UDP                1
+#define LWIP_UDP                0
 #define UDP_TTL                 255
 
 /* ------------------------ Statistics options ---------------------------- */
 #define STATS
+#undef  STATS
 
 #ifdef STATS
 #define LINK_STATS              1
@@ -176,6 +175,6 @@ a lot of data that needs to be copied, this should be set high. */
 /* ------------------------ PPP options ----------------------------------- */
 
 #define PPP_SUPPORT             1
-#define PAP_SUPPORT             1
-#define PPP_DEBUG               1
+#define PAP_SUPPORT             0
+#define PPP_DEBUG               0
 #endif

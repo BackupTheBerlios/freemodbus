@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: serial.c,v 1.2 2006/09/04 12:40:21 wolti Exp $
+ * File: $Id: serial.c,v 1.3 2006/09/04 14:39:20 wolti Exp $
  */
 
 
@@ -232,8 +232,8 @@ sio_open_new( u8_t devnr, u32_t baudrate, u8_t databits, sio_stop_t stopbits, si
     int             i;
     err_t           error = ERR_OK;
     serdev_t       *dev;
-    UARTParity_TypeDef eUARTParity;
-    UARTMode_TypeDef eUARTMode;
+    UARTParity_TypeDef eUARTParity = UART_NO_PARITY;
+    UARTMode_TypeDef eUARTMode = UARTM_8D;
     UARTStopBits_TypeDef eUARTStopBits;
 
     if( !initialized )

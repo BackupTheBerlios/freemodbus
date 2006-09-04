@@ -162,7 +162,7 @@ vPortDisableInterruptsFromThumb( void )
     asm volatile    ( "ORR		R0, R0, #0xC0" );       /* Disable IRQ, FIQ.                                            */
     asm volatile    ( "MSR		CPSR, R0" );    /* Write back modified value. */
     asm volatile    ( "LDMIA	SP!, {R0}" );   /* Pop R0. */
-    asm volatile    ( "BX		R14" );         /* Return back to thumb. */
+    asm volatile    ( "BX		R14" ); /* Return back to thumb. */
 }
 
 void
@@ -170,10 +170,10 @@ vPortEnableInterruptsFromThumb( void )
 {
     asm volatile    ( "STMDB	SP!, {R0}" );   /* Push R0.                                                                     */
     asm volatile    ( "MRS		R0, CPSR" );    /* Get CPSR.                                                            */
-    asm volatile    ( "BIC		R0, R0, #0xC0" );   /* Enable IRQ, FIQ. */
+    asm volatile    ( "BIC		R0, R0, #0xC0" );       /* Enable IRQ, FIQ. */
     asm volatile    ( "MSR		CPSR, R0" );    /* Write back modified value.  */
     asm volatile    ( "LDMIA	SP!, {R0}" );   /* Pop R0. */
-    asm volatile    ( "BX		R14" );         /* Return back to thumb. */
+    asm volatile    ( "BX		R14" ); /* Return back to thumb. */
 }
 
 #endif
@@ -188,7 +188,7 @@ vPortEnterCritical( void )
     /* Disable interrupts as per portDISABLE_INTERRUPTS();                                                          */
     asm volatile    ( "STMDB	SP!, {R0}" );   /* Push R0. */
     asm volatile    ( "MRS		R0, CPSR" );    /* Get CPSR. */
-    asm volatile    ( "ORR		R0, R0, #0xC0" );   /* Disable IRQ, FIQ. */
+    asm volatile    ( "ORR		R0, R0, #0xC0" );       /* Disable IRQ, FIQ. */
     asm volatile    ( "MSR		CPSR, R0" );    /* Write back modified value. */
     asm volatile    ( "LDMIA	SP!, {R0}" );   /* Pop R0. */
 
@@ -213,7 +213,7 @@ vPortExitCritical( void )
             /* Enable interrupts as per portEXIT_CRITICAL(). */
             asm volatile    ( "STMDB	SP!, {R0}" );   /* Push R0. */
             asm volatile    ( "MRS		R0, CPSR" );    /* Get CPSR. */
-            asm volatile    ( "BIC		R0, R0, #0xC0" ); /* Enable IRQ, FIQ. */
+            asm volatile    ( "BIC		R0, R0, #0xC0" );       /* Enable IRQ, FIQ. */
             asm volatile    ( "MSR		CPSR, R0" );    /* Write back modified value.   */
             asm volatile    ( "LDMIA	SP!, {R0}" );   /* Pop R0. */
         }

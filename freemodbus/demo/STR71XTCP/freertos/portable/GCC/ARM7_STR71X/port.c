@@ -178,4 +178,3 @@ prvSetupTimerInterrupt( void )
        it is safe to do this here. */
     WDG_CntOnOffConfig( ENABLE );
 }
-

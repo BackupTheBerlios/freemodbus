@@ -1,1 +1,1 @@
-..\..\tools\modpoll.exe -m ascii -a 10 -r 1000 -c 4 -t 3 -b 9600 -d 7 -p even COM4
+..\..\tools\modpoll.exe  -m tcp 10.0.10.2 -r 1000 -t 3:int
