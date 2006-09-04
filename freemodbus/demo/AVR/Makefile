@@ -94,7 +94,9 @@ flash:
 ## Clean target
 .PHONY: clean
 clean:
-	-rm -rf $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS) $(TARGET).elf $(TARGET).hex $(TARGET).eep
+	-rm -rf $(OBJECTS) $(MBOBJECTS) $(MBPORTOBJECTS) 
+	-rm -rf $(TARGET).elf $(TARGET).hex $(TARGET).eep $(TARGET).cof $(TARGET).map
+	-rm -rf dep
 
 ## Other dependencies
 -include $(shell mkdir dep 2>/dev/null) $(wildcard dep/*)
