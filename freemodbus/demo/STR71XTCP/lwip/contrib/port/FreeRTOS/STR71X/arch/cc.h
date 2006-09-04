@@ -37,6 +37,7 @@
 
 /* ------------------------ Project includes ------------------------------ */
 #include "cpu.h"
+#include "sys_arch.h"
 
 /* ------------------------ Defines --------------------------------------- */
 
@@ -71,14 +72,6 @@ typedef signed long s32_t;
 typedef u32_t   mem_ptr_t;
 typedef int     sys_prot_t;
 
-/* ------------------------ Type definitions (PPP) ------------------------ */
-/*
-typedef unsigned char u_char;
-typedef unsigned short u_short;
-typedef unsigned int u_int;
-*/
 /* ------------------------ Prototypes ------------------------------------ */
-void            sys_assert( const char *const msg );
-void            sys_debug( const char *const fmt, ... );
 
 #endif

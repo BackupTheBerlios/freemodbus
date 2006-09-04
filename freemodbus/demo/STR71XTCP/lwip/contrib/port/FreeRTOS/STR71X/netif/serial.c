@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: serial.c,v 1.1 2006/09/04 01:41:49 wolti Exp $
+ * File: $Id: serial.c,v 1.2 2006/09/04 12:40:21 wolti Exp $
  */
 
 
@@ -27,15 +27,13 @@
 
 /* ----------------------- lwIP includes ------------------------------------*/
 #include "lwip/opt.h"
-#include "lwip/def.h"
-#include "lwip/pbuf.h"
 #include "lwip/sys.h"
-#include "lwip/stats.h"
 #include "lwip/sio.h"
 #include "lwip/err.h"
 
 /* ----------------------- FreeRTOS includes --------------------------------*/
 #include "task.h"
+#include "semphr.h"
 
 /* ----------------------- Project includes ---------------------------------*/
 #include "serial.h"
@@ -79,6 +77,9 @@
         ( dev )->tx_sem = SYS_SEM_NULL; \
     } while( 0 )
 
+#define MS_TO_TICKS( ms )           \
+    ( portTickType )( ( portTickType ) ( ms ) / portTICK_RATE_MS )
+
 /* ----------------------- Type definitions ---------------------------------*/
 typedef struct
 {
@@ -89,13 +90,13 @@ typedef struct
     u8_t            rx_buf_rdpos;
     u8_t            rx_buf_wrpos;
     u8_t            rx_buf_cnt;
-    sys_sem_t       rx_sem;
+    xSemaphoreHandle rx_sem;
 
     u8_t            tx_buf[DEFAULT_TX_BUFSIZE];
     u8_t            tx_buf_rdpos;
     u8_t            tx_buf_wrpos;
     u8_t            tx_buf_cnt;
-    sys_sem_t       tx_sem;
+    xSemaphoreHandle tx_sem;
     UART_TypeDef   *UARTx;
 } serdev_t;
 
@@ -189,12 +190,13 @@ sio_close_low_level( u8_t devnr, serdev_t * dev )
     {
         error = ERR_IF;
     }
+    return error;
 }
 
 err_t
 sio_close( serdev_t * dev )
 {
-    int             i, old_level;
+    int             i;
     err_t           error = ERR_VAL;
 
     for( i = 0; i < UART_DEVICES_MAX; i++ )
@@ -206,29 +208,30 @@ sio_close( serdev_t * dev )
     }
     if( i < UART_DEVICES_MAX )
     {
-        old_level = sys_arch_protect(  );
+        vPortEnterCritical(  );
         error = sio_close_low_level( i, dev );
-        sys_arch_unprotect( old_level );
-        if( dev->tx_sem != SYS_SEM_NULL )
+        vPortExitCritical(  );
+
+        if( dev->tx_sem != ( xSemaphoreHandle ) 0 )
         {
-            sys_sem_free( dev->tx_sem );
+            vQueueDelete( dev->tx_sem );
         }
-        if( dev->rx_sem != SYS_SEM_NULL )
+        if( dev->rx_sem != ( xSemaphoreHandle ) 0 )
         {
-            sys_sem_free( dev->tx_sem );
+            vQueueDelete( dev->tx_sem );
         }
         SIO_RESET_STATE( dev );
     }
+
+    return error;
 }
 
 sio_fd_t
 sio_open_new( u8_t devnr, u32_t baudrate, u8_t databits, sio_stop_t stopbits, sio_parity_t parity )
 {
     int             i;
-    int             old_level;
     err_t           error = ERR_OK;
     serdev_t       *dev;
-    UART_TypeDef   *UARTx = NULL;
     UARTParity_TypeDef eUARTParity;
     UARTMode_TypeDef eUARTMode;
     UARTStopBits_TypeDef eUARTStopBits;
@@ -298,16 +301,20 @@ sio_open_new( u8_t devnr, u32_t baudrate, u8_t databits, sio_stop_t stopbits, si
         if( error == ERR_OK )
         {
             SIO_RESET_STATE( dev );
-            old_level = sys_arch_protect(  );
+
+            vSemaphoreCreateBinary( dev->rx_sem );
+            vSemaphoreCreateBinary( dev->tx_sem );
+
+            vPortEnterCritical(  );
             if( ( error = sio_open_low_level( devnr, dev ) ) != ERR_OK )
             {
                 /* Hardware interface does not exist. */
             }
-            else if( ( dev->tx_sem = sys_sem_new( 0 ) ) == SYS_SEM_NULL )
+            else if( dev->tx_sem == ( xSemaphoreHandle ) 0 )
             {
                 error = ERR_MEM;
             }
-            else if( ( dev->rx_sem = sys_sem_new( 0 ) ) == SYS_SEM_NULL )
+            else if( dev->rx_sem == ( xSemaphoreHandle ) 0 )
             {
                 error = ERR_MEM;
             }
@@ -326,16 +333,18 @@ sio_open_new( u8_t devnr, u32_t baudrate, u8_t databits, sio_stop_t stopbits, si
 
                 /* Device is now ready for use. */
                 dev->ready = 1;
-                error = ERR_OK;
             }
 
             if( error != ERR_OK )
             {
                 sio_close( dev );
             }
-
-            sys_arch_unprotect( old_level );
+            vPortExitCritical(  );
         }
+    }
+    else
+    {
+        error = ERR_VAL;
     }
     return error == ERR_OK ? ( void * )dev : SIO_FD_NULL;
 }
@@ -388,7 +397,6 @@ u8_t
 sio_recv( sio_fd_t fd )
 {
     u8_t            data;
-    u32_t           res;
     serdev_t       *dev = fd;
 
     if( dev->ready )
@@ -406,13 +414,8 @@ sio_recv( sio_fd_t fd )
 u32_t
 sio_read( sio_fd_t fd, u8_t * buf, u32_t size )
 {
-    u16             status;
     u32_t           ch_left = size;
     u32_t           ch_received = 0;
-    u32_t           time_waited;
-    u32_t           time_left;
-
-    int             old_level;
     volatile serdev_t *dev = fd;
 
     if( dev->ready )
@@ -420,7 +423,7 @@ sio_read( sio_fd_t fd, u8_t * buf, u32_t size )
         dev->abort = 0;
         while( ch_left && !dev->abort )
         {
-            old_level = sys_arch_protect(  );
+            vPortEnterCritical(  );
             while( ( dev->rx_buf_cnt > 0 ) && ( ch_left > 0 ) )
             {
                 /* Fetch character from the ring buffer. */
@@ -431,13 +434,14 @@ sio_read( sio_fd_t fd, u8_t * buf, u32_t size )
                 ch_left--;
                 ch_received++;
             }
-            sys_arch_unprotect( old_level );
+            vPortExitCritical(  );
             /* If we want more data block on the semaphore and wait until
              * something happens.
              */
             if( ch_left )
             {
-                if( sys_arch_sem_wait( dev->rx_sem, DEFAULT_READTIMEOUT_MS ) == SYS_ARCH_TIMEOUT )
+                if( xSemaphoreTake( dev->rx_sem, MS_TO_TICKS( DEFAULT_READTIMEOUT_MS ) ) ==
+                    pdFALSE )
                 {
                     /* A timeout. Abort the read and return the characters 
                      * received so far. 
@@ -453,7 +457,6 @@ sio_read( sio_fd_t fd, u8_t * buf, u32_t size )
 u32_t
 sio_write( sio_fd_t fd, u8_t * buf, u32_t size )
 {
-    int             old_level;
     u32_t           ch_left;
 
     volatile serdev_t *dev = fd;
@@ -463,7 +466,7 @@ sio_write( sio_fd_t fd, u8_t * buf, u32_t size )
         ch_left = size;
         while( ch_left > 0 )
         {
-            old_level = sys_arch_protect(  );
+            vPortEnterCritical(  );
             while( ( dev->tx_buf_cnt < DEFAULT_TX_BUFSIZE ) && ( ch_left > 0 ) )
             {
                 dev->tx_buf[dev->tx_buf_wrpos] = *buf++;
@@ -473,14 +476,14 @@ sio_write( sio_fd_t fd, u8_t * buf, u32_t size )
             }
             /* Enable transmit FIFO empty interrupts and block. */
             UART_ItConfig( dev->UARTx, UART_TxHalfEmpty, ENABLE );
-            sys_arch_unprotect( old_level );
+            vPortExitCritical(  );
 
             /* Not all characters sent within one write. Block on a semaphore
              * which is triggered when the buffer is empty again.
              */
             if( ch_left != 0 )
             {
-                sys_arch_sem_wait( dev->tx_sem, 0 );
+                while( xSemaphoreTake( dev->tx_sem, portMAX_DELAY ) != pdTRUE );
             }
         }
     }

@@ -30,7 +30,7 @@
  * Author: Adam Dunkels <adam@sics.se>
  * Modifcations: Christian Walter <wolti@sil.at>
  *
- * $Id: sys_arch.c,v 1.1 2006/09/04 01:41:49 wolti Exp $
+ * $Id: sys_arch.c,v 1.2 2006/09/04 12:40:21 wolti Exp $
  */
 
 /* ------------------------ System includes ------------------------------- */
@@ -52,6 +52,9 @@
 #include "lwip/sio.h"
 #include "lwip/stats.h"
 
+/* ------------------------ Project includes ------------------------------ */
+#include "netif/serial.h"
+
 /* ------------------------ Defines --------------------------------------- */
 /* This is the number of threads that can be started with sys_thead_new() */
 #define SYS_MBOX_SIZE               ( 16 )
@@ -66,38 +69,37 @@
 /* Must hold the string THREAD_NAME + task number + terminating '\0'. */
 #define THREAD_NAME_LEN_MAX         6
 
+#define THREAD_INIT( tcb ) \
+    do { \
+        tcb->next = NULL; \
+        tcb->pid = ( xTaskHandle )0; \
+        tcb->timeouts.next = NULL; \
+        memset( tcb->name, 0, THREAD_NAME_LEN_MAX ); \
+    } while( 0 )
+
 /* ------------------------ Type definitions ------------------------------ */
-typedef struct
+typedef struct sys_tcb
 {
+    struct sys_tcb *next;
     struct sys_timeouts timeouts;
     xTaskHandle     pid;
     char            name[THREAD_NAME_LEN_MAX];
 } sys_tcb_t;
 
+/* ------------------------ Prototypes 000000------------------------------ */
+int             putchar( int c );
+
 /* ------------------------ Static functions ------------------------------ */
 sys_tcb_t      *sys_thread_current( void );
 
 /* ------------------------ Static variables ------------------------------ */
-static sys_tcb_t tasks[SYS_THREAD_MAX];
-static int      nextthread = 0;
+static sys_tcb_t *tasks;
 
 /* ------------------------ Start implementation -------------------------- */
 void
 sys_init( void )
 {
-    int             i;
-
-    /* Initialize the the per-thread sys_timeouts structures  make sure there
-     * are no valid pids in the list */
-    for( i = 0; i < SYS_THREAD_MAX; i++ )
-    {
-        tasks[i].timeouts.next = NULL;
-        tasks[i].pid = 0;
-        snprintf( tasks[i].name, THREAD_NAME_LEN_MAX, "%s%d", THREAD_NAME, i );
-    }
-
-    /* keep track of how many threads have been created */
-    nextthread = 0;
+    tasks = NULL;
 }
 
 /*
@@ -141,9 +143,9 @@ sys_assert( const char *msg )
 {
     extern sio_fd_t stdio_fd;
 
-    ( void )sio_write_noisr( stdio_fd, msg, strlen( msg ) );
+    ( void )sio_write_noisr( stdio_fd, ( u8_t * ) msg, ( u32_t ) strlen( msg ) );
     ( void )sio_write_noisr( stdio_fd, "\n\r", 2 );
-    ( void )sys_arch_protect(  );
+    vPortEnterCritical(  );
     for( ;; );
 }
 
@@ -180,63 +182,143 @@ putchar( int c )
 
 /* ------------------------ Start implementation ( Threads ) -------------- */
 
-/*
- * Starts a new thread with priority "prio" that will begin its execution in the
- * function "thread()". The "arg" argument will be passed as an argument to the
- * thread() function. The id of the new thread is returned. Both the id and
- * the priority are system dependent.
- */
 sys_thread_t
 sys_thread_new( void ( *thread ) ( void *arg ), void *arg, int prio )
 {
-    xTaskHandle     xCreatedTask;
-    sys_prot_t      old_level;
+    return sys_arch_thread_new( thread, arg, prio, THREAD_STACK_SIZE );
+}
 
-    old_level = sys_arch_protect(  );
+/*
+ * Starts a new thread with priority "prio" that will begin its execution in the
+ * function "thread()". The "arg" argument will be passed as an argument to the
+ * thread() function. The argument "ssize" is the requested stack size for the
+ * new thread. The id of the new thread is returned. Both the id and the
+  * priority are system dependent.
+ */
+sys_thread_t
+sys_arch_thread_new( void ( *thread ) ( void *arg ), void *arg, int prio, size_t ssize )
+{
+    sys_thread_t    thread_hdl = SYS_THREAD_NULL;
+    int             i;
+    sys_tcb_t      *p;
 
     /* We disable the FreeRTOS scheduler because it might be the case that the new
      * tasks gets scheduled inside the xTaskCreate function. To prevent this we
      * disable the scheduling. Note that this can happen although we have interrupts
      * disabled because xTaskCreate contains a call to taskYIELD( ).
      */
+    vPortEnterCritical(  );
     vTaskSuspendAll(  );
-    if( xTaskCreate( thread, tasks[nextthread].name, THREAD_STACK_SIZE,
-                     arg, prio, &xCreatedTask ) == pdPASS )
+
+    p = tasks;
+    i = 0;
+    /* We are called the first time. Initialize it. */
+    if( p == NULL )
     {
-        tasks[nextthread++].pid = xCreatedTask;
+        p = tasks = pvPortMalloc( sizeof( sys_tcb_t ) );
     }
     else
     {
-        xCreatedTask = SYS_THREAD_NULL;
+        while( p->next != NULL )
+        {
+            p = p->next;
+            i++;
+        }
+        p->next = pvPortMalloc( sizeof( sys_tcb_t ) );
+        p = p->next;
     }
-    ( void )xTaskResumeAll(  );
 
-    sys_arch_unprotect( old_level );
-    return xCreatedTask;
+    if( p != NULL )
+    {
+        /* Memory allocated. Initialize the data structure. */
+        THREAD_INIT( p );
+        ( void )sprintf( p->name, "lwIP%d", i );
+
+        /* Now q points to a free element in the list. */
+        if( xTaskCreate( thread, p->name, ssize, arg, prio, &p->pid ) == pdPASS )
+        {
+            thread_hdl = p;
+        }
+        else
+        {
+            vPortFree( p );
+        }
+    }
+
+    ( void )xTaskResumeAll(  );
+    vPortExitCritical(  );
+    return thread_hdl;
+}
+
+void
+sys_arch_thread_remove( sys_thread_t hdl )
+{
+    sys_tcb_t      *current = tasks, *last;
+    sys_tcb_t      *toremove = hdl;
+    xTaskHandle     pid = ( xTaskHandle ) 0;
+
+    LWIP_ASSERT( "sys_arch_thread_remove: assertion hdl != NULL failed!", hdl != NULL );
+
+    /* If we have to remove the first task we must update the global "tasks"
+     * variable. */
+    vPortEnterCritical(  );
+    if( hdl != NULL )
+    {
+        last = NULL;
+        while( ( current != NULL ) && ( current != toremove ) )
+        {
+            last = current;
+            current = current->next;
+        }
+        /* Found it. */
+        if( current == toremove )
+        {
+            /* Not the first entry in the list. */
+            if( last != NULL )
+            {
+                last->next = toremove->next;
+            }
+            else
+            {
+                tasks = toremove->next;
+            }
+            LWIP_ASSERT( "sys_arch_thread_remove: can't remove thread with timeouts!",
+                         toremove->timeouts.next == NULL );
+            pid = toremove->pid;
+            THREAD_INIT( toremove );
+
+            vTaskDelete( toremove->pid );
+
+        }
+    }
+    /* We are done with accessing the shared datastructure. Release the 
+     * resources.
+     */
+    vPortExitCritical(  );
+    if( pid != ( xTaskHandle ) 0 )
+    {
+        vTaskDelete( pid );
+        /* not reached. */
+    }
 }
 
 /*
  * Returns the thread control block for the currently active task. In case
  * of an error the functions returns NULL.
  */
-sys_tcb_t      *
-sys_thread_current( void )
+sys_thread_t
+sys_arch_thread_current( void )
 {
-    sys_prot_t      old_level;
-    sys_tcb_t      *ptask = NULL;
-    int             i;
+    sys_tcb_t      *p = tasks;
     xTaskHandle     pid = xTaskGetCurrentTaskHandle(  );
 
-    old_level = sys_arch_protect(  );
-    for( i = 0; i < nextthread; i++ )
+    vPortEnterCritical(  );
+    while( ( p != NULL ) && ( p->pid != pid ) )
     {
-        if( tasks[i].pid == pid )
-        {
-            ptask = &tasks[i];
-        }
+        p = p->next;
     }
-    sys_arch_unprotect( old_level );
-    return ptask;
+    vPortExitCritical(  );
+    return p;
 }
 
 /*
@@ -255,7 +337,7 @@ sys_arch_timeouts( void )
 {
     sys_tcb_t      *ptask;
 
-    ptask = sys_thread_current(  );
+    ptask = sys_arch_thread_current(  );
     LWIP_ASSERT( "sys_arch_timeouts: ptask != NULL", ptask != NULL );
     return ptask != NULL ? &( ptask->timeouts ) : NULL;
 }
@@ -268,10 +350,7 @@ sys_arch_timeouts( void )
 sys_sem_t
 sys_sem_new( u8_t count )
 {
-    sys_prot_t      old_level;
     xSemaphoreHandle xSemaphore;
-
-    old_level = sys_arch_protect(  );
 
     vSemaphoreCreateBinary( xSemaphore );
     if( xSemaphore != SYS_SEM_NULL )
@@ -281,11 +360,13 @@ sys_sem_new( u8_t count )
             xSemaphoreTake( xSemaphore, 1 );
         }
 #ifdef SYS_STATS
+        vPortEnterCritical(  );
         lwip_stats.sys.sem.used++;
         if( lwip_stats.sys.sem.used > lwip_stats.sys.sem.max )
         {
             lwip_stats.sys.sem.max = lwip_stats.sys.sem.used;
         }
+        vPortExitCritical(  );
 #endif
     }
     else
@@ -293,7 +374,6 @@ sys_sem_new( u8_t count )
         LWIP_ASSERT( "sys_sem_new: xSemaphore == SYS_SEM_NULL\n", xSemaphore != SYS_SEM_NULL );
     }
 
-    sys_arch_unprotect( old_level );
     return xSemaphore;
 }
 
@@ -305,7 +385,9 @@ sys_sem_free( sys_sem_t sem )
     if( sem != SYS_SEM_NULL )
     {
 #ifdef SYS_STATS
+        vPortEnterCritical(  );
         lwip_stats.sys.sem.used--;
+        vPortExitCritical(  );
 #endif
         vQueueDelete( sem );
     }
@@ -383,11 +465,13 @@ sys_mbox_new( void )
     if( mbox != SYS_MBOX_NULL )
     {
 #ifdef SYS_STATS
+        vPortEnterCritical(  );
         lwip_stats.sys.mbox.used++;
         if( lwip_stats.sys.mbox.used > lwip_stats.sys.mbox.max )
         {
             lwip_stats.sys.mbox.max = lwip_stats.sys.mbox.used;
         }
+        vPortExitCritical(  );
 #endif
     }
     return mbox;
@@ -415,7 +499,9 @@ sys_mbox_free( sys_mbox_t mbox )
         }
         vQueueDelete( mbox );
 #ifdef SYS_STATS
+        vPortEnterCritical(  );
         lwip_stats.sys.mbox.used--;
+        vPortExitCritical(  );
 #endif
     }
 }
