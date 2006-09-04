@@ -1,6 +1,10 @@
 /*
  * FreeModbus Libary: ATMega168 Port
  * Copyright (C) 2006 Christian Walter <wolti@sil.at>
+ *   - Initial version and ATmega168 support
+ * Modfications Copyright (C) 2006 Tran Minh Hoang:
+ *   - ATmega8, ATmega16, ATmega32 support
+ *   - RS485 support for DS75176
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -16,7 +20,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portserial.c,v 1.4 2006/09/04 18:50:39 wolti Exp $
+ * File: $Id: portserial.c,v 1.5 2006/09/04 19:36:51 wolti Exp $
  */
 
 #include <avr/io.h>
