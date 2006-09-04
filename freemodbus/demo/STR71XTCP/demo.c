@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: demo.c,v 1.2 2006/09/04 14:39:20 wolti Exp $
+ * File: $Id: demo.c,v 1.3 2006/09/04 19:33:31 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -209,12 +209,12 @@ vPPPStatusCB( void *ctx, int err, void *arg )
     case PPPERR_NONE:
         ePPPThrCtlNew = CONNECTED;
         ppp_addrs = arg;
-        vMBPortLog( MB_LOG_ERROR, "PPP", "new PPP connection established\r\n" );
-        vMBPortLog( MB_LOG_ERROR, "PPP", "  our IP address = %s\r\n",
+        vMBPortLog( MB_LOG_INFO, "PPP", "new PPP connection established\r\n" );
+        vMBPortLog( MB_LOG_INFO, "PPP", "  our IP address = %s\r\n",
                     _inet_ntoa( ppp_addrs->our_ipaddr.addr ) );
-        vMBPortLog( MB_LOG_ERROR, "PPP", "  his IP address = %s\r\n",
+        vMBPortLog( MB_LOG_INFO, "PPP", "  his IP address = %s\r\n",
                     _inet_ntoa( ppp_addrs->his_ipaddr.addr ) );
-        vMBPortLog( MB_LOG_ERROR, "PPP", "  netmask = %s\r\n",
+        vMBPortLog( MB_LOG_INFO, "PPP", "  netmask = %s\r\n",
                     _inet_ntoa( ppp_addrs->netmask.addr ) );
         break;
     default:
