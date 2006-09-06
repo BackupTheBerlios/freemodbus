@@ -30,7 +30,7 @@
  * Author: Adam Dunkels <adam@sics.se>
  * Modifcations: Christian Walter <wolti@sil.at>
  *
- * $Id: sys_arch.c,v 1.4 2006/09/06 19:14:53 wolti Exp $
+ * $Id: sys_arch.c,v 1.5 2006/09/06 19:54:19 wolti Exp $
  */
 
 /* ------------------------ System includes ------------------------------- */
@@ -58,7 +58,6 @@
 /* ------------------------ Defines --------------------------------------- */
 /* This is the number of threads that can be started with sys_thead_new() */
 #define SYS_MBOX_SIZE               ( 16 )
-#define SYS_THREAD_MAX              ( 4 )
 #define MS_TO_TICKS( ms )           \
     ( portTickType )( ( portTickType ) ( ms ) / portTICK_RATE_MS )
 #define TICKS_TO_MS( ticks )        \
@@ -223,9 +222,12 @@ sys_arch_thread_new( void ( *thread ) ( void *arg ), void *arg, int prio, size_t
     }
     else
     {
+        /* First task already counter. */
         i++;
+        /* Cycle to the end of the list. */
         while( p->next != NULL )
         {
+            i++;
             p = p->next;
         }
         p->next = pvPortMalloc( sizeof( sys_tcb_t ) );
