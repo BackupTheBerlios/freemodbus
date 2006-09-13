@@ -24,7 +24,9 @@
 *
 ******************************************************************************
 * REVISION HISTORY
-*
+* 06-09-13 Christian Walter <wolti@sil.at>
+*   pppMain now correctly exists by releasing all resources and destroying
+*   the thread.
 * 06-08-04 Christian Walter <wolti@sil.at>
 *   pppOpen code now checks if thread creation was successfull. If not returns
 *   an error.
