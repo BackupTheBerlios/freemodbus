@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.h,v 1.14 2006/09/23 14:13:07 wolti Exp $
+  * File: $Id: mb.h,v 1.15 2006/09/24 23:22:29 wolti Exp $
   */
 
 #ifndef _MB_H
@@ -245,6 +245,9 @@ eMBErrorCode    eMBSetSlaveID( UCHAR ucSlaveID, BOOL xIsRunning,
  *
  * \param ucFunctionCode The Modbus function code for which this handler should
  *   be registers.
+ * \param pxHandler The function handler which should be called in case
+ *   such a frame is received.
+ *
  * \return eMBErrorCode::MB_ENOERR if the handler has been installed. If no
  *   more resources are available it returns eMBErrorCode::MB_ENORES. In this
  *   case the values in mbconfig.h should be adjusted. If the argument was not
