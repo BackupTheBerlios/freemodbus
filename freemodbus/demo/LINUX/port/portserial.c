@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portserial.c,v 1.2 2006/10/12 08:20:55 wolti Exp $
+ * File: $Id: portserial.c,v 1.3 2006/10/12 08:35:34 wolti Exp $
  */
 
 /* ----------------------- Standard includes --------------------------------*/
@@ -279,7 +279,6 @@ prvbMBPortSerialWrite( UCHAR * pucBuffer, USHORT usNBytes )
         done += res;
         left -= res;
     }
-    while( left != 0 );
     return left == 0 ? TRUE : FALSE;
 }
 
