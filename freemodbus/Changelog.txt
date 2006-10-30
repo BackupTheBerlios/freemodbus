@@ -1,4 +1,15 @@
 
+2006-10-30 (REL_1_0_5) Christian Walter <wolti@sil.at>:
+ Notes: eMBDisable and eMBClose can now be called multiple times 
+   which makes shutdown of the protocol stack easier.
+
+ Detailted notes:
+   - FEATURE (ALL): eMBDisable can now be called multiple times
+	    and returns MB_ENOERR in case is was already disabled. 
+			eMBClose also supports beeing called multiple times in 
+			which pvMBFrameCloseCur( ) is called when the protocol stack
+			is in state STATE_DISABLED.
+
 2006-10-11 (REL_1_0_4) Christian Walter <wolti@sil.at>:
  Notes: Fixed bug when more than 255 coils are requested. Fixed bug in 
    Linux/Cygwin port when not all bytes could be written by the first 
