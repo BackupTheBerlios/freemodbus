@@ -1,5 +1,5 @@
 
-2006-10-30 (REL_1_0_6) Christian Walter <wolti@sil.at>:
+2006-10-30 (REL_1_1_0) Christian Walter <wolti@sil.at>:
  Notes: Added support for Read/Write Multiple Registers function
    (0x17). Added some tips to reduce memory requirements.
 
