@@ -8,7 +8,7 @@
    - FEATURE (MSP430): Added new MSP430 port.
    - FEATURE (ALL): Added support for Read/Write Multiple Registers
       function (0x17). The implementation simply makes two callbacks
-      to the eMBRegHoldingCB function where frist the values are
+      to the eMBRegHoldingCB function where first the values are
       written and then the other register values are read.
    - FEATURE (ALL): Added some tips on reducing memory requirements
        with the protocol stack.
