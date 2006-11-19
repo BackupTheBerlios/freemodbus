@@ -3,11 +3,11 @@
 #
 # Copyright (c) 2006 Christian Walter, Vienna 2006.
 #
-# $Id: Makefile,v 1.1 2006/11/19 03:36:01 wolti Exp $
+# $Id: Makefile,v 1.2 2006/11/19 03:57:49 wolti Exp $
 #
 # ---------------------------------------------------------------------------
 
-BASE        = /cygdrive/c/mspgcc
+BASE        = /opt/gcc-msp430/
 CC	        = $(BASE)/bin/msp430-gcc
 LD          = $(BASE)/bin/msp430-ld
 CXX	        = $(BASE)/bin/msp430-g++
@@ -54,7 +54,7 @@ flash-erase:
 proxy:
 	$(GDBPROXY) --port=2000 msp430
 debug:
-	$(INSIGHT) --command=m5235.gdb --se=$(TGT).elf
+	$(INSIGHT) --command=msp430.gdb --se=$(TGT).elf
 
 $(BIN): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
