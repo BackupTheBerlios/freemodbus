@@ -1,4 +1,14 @@
 
+2006-11-19 (REL_1_1_1) Christian Walter <wolti@sil.at>:
+ Notes: Fixed buy in Read/Write Multiple Registers function where
+   the registers addresses where calculated wrong.
+
+ Detailed notes:
+   - BUG (ALL): The registers address received in a Modbus frame
+      must be converted to application addresses. The code for this
+	  conversion was missing and therefore has lead to error when
+	  this function was used (Registers of by one, Start at > 1).
+
 2006-10-30 (REL_1_1_0) Christian Walter <wolti@sil.at>:
  Notes: Added support for Read/Write Multiple Registers function
    (0x17). Added some tips to reduce memory requirements. 
