@@ -239,12 +239,14 @@ eMBFuncReadWriteMultipleHoldingRegister( UCHAR * pucFrame, USHORT * usLen )
     {
         usRegReadAddress = pucFrame[MB_PDU_FUNC_READWRITE_READ_ADDR_OFF] << 8U;
         usRegReadAddress |= pucFrame[MB_PDU_FUNC_READWRITE_READ_ADDR_OFF + 1];
+        usRegReadAddress++;
 
         usRegReadCount = pucFrame[MB_PDU_FUNC_READWRITE_READ_REGCNT_OFF] << 8U;
         usRegReadCount |= pucFrame[MB_PDU_FUNC_READWRITE_READ_REGCNT_OFF + 1];
 
         usRegWriteAddress = pucFrame[MB_PDU_FUNC_READWRITE_WRITE_ADDR_OFF] << 8U;
         usRegWriteAddress |= pucFrame[MB_PDU_FUNC_READWRITE_WRITE_ADDR_OFF + 1];
+        usRegWriteAddress++;
 
         usRegWriteCount = pucFrame[MB_PDU_FUNC_READWRITE_WRITE_REGCNT_OFF] << 8U;
         usRegWriteCount |= pucFrame[MB_PDU_FUNC_READWRITE_WRITE_REGCNT_OFF + 1];
