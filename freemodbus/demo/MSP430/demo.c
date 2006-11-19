@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: demo.c,v 1.1 2006/11/19 03:00:34 wolti Exp $
+ * File: $Id: demo.c,v 1.2 2006/11/19 03:36:01 wolti Exp $
  */
 
 /* ----------------------- Platform includes --------------------------------*/
@@ -43,9 +43,7 @@ static USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
 int
 main( void )
 {
-    const UCHAR     ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
     eMBErrorCode    eStatus;
-    CHAR            ucResult;
     volatile USHORT usACLKCnt;
 
     /* Stop Watchdog Timer. */

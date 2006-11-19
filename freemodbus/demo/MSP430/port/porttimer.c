@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: porttimer.c,v 1.1 2006/11/19 03:00:34 wolti Exp $
+ * File: $Id: porttimer.c,v 1.2 2006/11/19 03:36:01 wolti Exp $
  */
 
 /* ----------------------- Platform includes --------------------------------*/
@@ -81,10 +81,12 @@ vMBPortTimersDisable( void )
     TACTL &= ~( MC0 | MC1 );
 }
 
-
+#if defined (__GNUC__)
+interrupt (TIMERA0_VECTOR) prvvMBTimerIRQHandler( void )
+#else
 void
-prvvMBTimerIRQHandler( void )
-    __interrupt[TIMERA0_VECTOR]
+prvvMBTimerIRQHandler( void ) __interrupt[TIMERA0_VECTOR]
+#endif
 {
     ( void )pxMBPortCBTimerExpired(  );
 }

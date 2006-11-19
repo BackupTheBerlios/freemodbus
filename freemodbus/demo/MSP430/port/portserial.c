@@ -16,7 +16,7 @@
  * License along with this library; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
- * File: $Id: portserial.c,v 1.1 2006/11/19 03:00:34 wolti Exp $
+ * File: $Id: portserial.c,v 1.2 2006/11/19 03:36:01 wolti Exp $
  */
 
 /* ----------------------- Platform includes --------------------------------*/
@@ -153,17 +153,23 @@ xMBPortSerialGetByte( CHAR * pucByte )
     return TRUE;
 }
 
+#if defined (__GNUC__)
+interrupt (USART0TX_VECTOR) prvvMBSerialRXIRQHandler( void )
+#else
 void
-prvvMBSerialRXIRQHandler( void )
-    __interrupt[USART0RX_VECTOR]
+prvvMBSerialRXIRQHandler( void ) __interrupt[USART0RX_VECTOR]
+#endif
 {
     DEBUG_TOGGLE_RX( );
     pxMBFrameCBByteReceived(  );
 }
 
+#if defined (__GNUC__)
+interrupt (USART0RX_VECTOR) prvvMBSerialTXIRQHandler( void )
+#else
 void
-prvvMBSerialTXIRQHandler( void )
-    __interrupt[USART0TX_VECTOR]
+prvvMBSerialTXIRQHandler( void ) __interrupt[USART0TX_VECTOR]
+#endif
 {
     DEBUG_TOGGLE_TX( );
     pxMBFrameCBTransmitterEmpty(  );
@@ -172,10 +178,15 @@ prvvMBSerialTXIRQHandler( void )
 void
 EnterCriticalSection( void )
 {
+    USHORT usOldSR;
     if( ucCriticalNesting == 0 )
     {
-        USHORT          usOldSR = _DINT(  );
-
+#if defined (__GNUC__)
+        usOldSR = READ_SR;
+        _DINT( );
+#else
+        usOldSR = _DINT( );
+#endif
         ucGIEWasEnabled = usOldSR & GIE ? TRUE : FALSE;
     }
     ucCriticalNesting++;

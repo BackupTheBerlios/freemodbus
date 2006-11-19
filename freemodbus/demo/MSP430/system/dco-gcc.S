@@ -53,23 +53,23 @@
  */
 
 /* ----------------------- MSP430 registers ---------------------------------*/
-DCOCTL    .equ  0x0056          /* DCO Clock Frequency Control */
-TACTL     .equ  0x0160          /* Timer A 0 Control */
-TACCTL2   .equ  0x0166          /* Timer A 0 Capture/Compare Control 2 */
-TACCR2    .equ  0x0176          /* Timer A 0 Capture/Compare 2 */
-BCSCTL1   .equ  0x0057          /* Basic Clock Module Register */
+.equ DCOCTL,    0x0056          /* DCO Clock Frequency Control */
+.equ TACTL,     0x0160          /* Timer A 0 Control */
+.equ TACCTL2,   0x0166          /* Timer A 0 Capture/Compare Control 2 */
+.equ TACCR2,    0x0176          /* Timer A 0 Capture/Compare 2 */
+.equ BCSCTL1,   0x0057          /* Basic Clock Module Register */
 
-XT2OFF    .equ  0x80
-DIVA_3    .equ  0x30
-CCIFG     .equ  0x0001          /* Capture/compare interrupt flag */
-TACLR     .equ  0x0004          /*  Timer A counter clear */
+.equ XT2OFF,    0x80
+.equ DIVA_3,    0x30
+.equ CCIFG,     0x0001          /* Capture/compare interrupt flag */
+.equ TACLR,     0x0004          /*  Timer A counter clear */
 
-CM_1      .equ  (1*0x4000)      /* Capture mode: 1 - pos. edge */
-CCIS_1    .equ  (1*0x1000)      /* Capture input select : 1 - CCIxB */
-CAP       .equ  0x0100          /* Capture mode: 1, Compare mode: 0 */
+.equ CM_1,      (1*0x4000)      /* Capture mode: 1 - pos. edge */
+.equ CCIS_1,    (1*0x1000)      /* Capture input select : 1 - CCIxB */
+.equ CAP,       0x0100          /* Capture mode: 1, Compare mode: 0 */
 
-TASSEL_2  .equ  (2*0x100)       /* Timer A clock source select */
-MC_2      .equ  (2*0x10)        /* Timer A mode control: 2 - Continous up */
+.equ TASSEL_2,  (2*0x100)       /* Timer A clock source select */
+.equ MC_2,      (2*0x10)        /* Timer A mode control: 2 - Continous up */
 
 /* ----------------------- MSP430 registers ---------------------------------*/
 
@@ -84,12 +84,11 @@ MC_2      .equ  (2*0x10)        /* Timer A mode control: 2 - Continous up */
  *   2 - DCO running at fastest setting
  *   0xff - Timeout Occured while setting DCO
  */
+    .text
+    .align 2
+    .globl cTISetDCO
 
-    CODE
-    ALIGN 2
-    EXPORT _cTISetDCO
-
-_cTISetDCO:
+cTISetDCO:
     push.w  r10
     push.w  r11
     push.w  &TACTL
