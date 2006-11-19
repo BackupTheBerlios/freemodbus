@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbproto.h,v 1.12 2006/11/03 16:53:36 wolti Exp $
+  * File: $Id: mbproto.h,v 1.13 2006/11/19 03:03:40 wolti Exp $
   */
 
 #ifndef _MB_PROTO_H
@@ -57,7 +57,7 @@ PR_BEGIN_EXTERN_C
     MB_EX_SLAVE_BUSY = 0x06,
     MB_EX_MEMORY_PARITY_ERROR = 0x08,
     MB_EX_GATEWAY_PATH_FAILED = 0x0A,
-    MB_EX_GATEWAY_TGT_FAILED = 0x0B,
+    MB_EX_GATEWAY_TGT_FAILED = 0x0B
 } eMBException;
 
 typedef         eMBException( *pxMBFunctionHandler ) ( UCHAR * pucFrame, USHORT * pusLength );
