@@ -8,6 +8,9 @@
       must be converted to application addresses. The code for this
 	  conversion was missing and therefore has lead to error when
 	  this function was used (Registers of by one, Start at > 1).
+   - FEATURE (MCF5235): Added sample shell scripts for testing.
+   - FEATURE (MSP430): Added sample shell script for testing and
+      changed default values to match the other ports.
 
 2006-10-30 (REL_1_1_0) Christian Walter <wolti@sil.at>:
  Notes: Added support for Read/Write Multiple Registers function
