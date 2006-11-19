@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mb.c,v 1.22 2006/11/03 17:29:26 wolti Exp $
+  * File: $Id: mb.c,v 1.23 2006/11/19 03:01:52 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -317,7 +317,7 @@ eMBDisable( void )
 }
 
 eMBErrorCode
-eMBPoll(  )
+eMBPoll( void )
 {
     static UCHAR   *ucMBFrame;
     static UCHAR    ucRcvAddress;
