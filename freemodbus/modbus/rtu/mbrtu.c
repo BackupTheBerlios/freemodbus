@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: mbrtu.c,v 1.14 2006/11/19 03:04:11 wolti Exp $
+  * File: $Id: mbrtu.c,v 1.15 2006/11/20 10:17:40 wolti Exp $
   */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -81,31 +81,32 @@ eMBRTUInit( UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eMBParity ePar
     {
         eStatus = MB_EPORTERR;
     }
-
-    /* If baudrate > 19200 then we should use the fixed timer values
-     * t35 = 1750us. Otherwise t35 must be 3.5 times the character time.
-     */
-    if( ulBaudRate > 19200 )
-    {
-        usTimerT35_50us = 35;   /* 1800us. */
-    }
     else
     {
-        /* The timer reload value for a character is given by:
-         *
-         * ChTimeValue = Ticks_per_1s / ( Baudrate / 11 )
-         *             = 11 * Ticks_per_1s / Baudrate
-         *             = 220000 / Baudrate
-         * The reload for t3.5 is 1.5 times this value and similary
-         * for t3.5.
+        /* If baudrate > 19200 then we should use the fixed timer values
+         * t35 = 1750us. Otherwise t35 must be 3.5 times the character time.
          */
-        usTimerT35_50us = ( 7UL * 220000UL ) / ( 2UL * ulBaudRate );
+        if( ulBaudRate > 19200 )
+        {
+            usTimerT35_50us = 35;       /* 1800us. */
+        }
+        else
+        {
+            /* The timer reload value for a character is given by:
+             *
+             * ChTimeValue = Ticks_per_1s / ( Baudrate / 11 )
+             *             = 11 * Ticks_per_1s / Baudrate
+             *             = 220000 / Baudrate
+             * The reload for t3.5 is 1.5 times this value and similary
+             * for t3.5.
+             */
+            usTimerT35_50us = ( 7UL * 220000UL ) / ( 2UL * ulBaudRate );
+        }
+        if( xMBPortTimersInit( ( USHORT ) usTimerT35_50us ) != TRUE )
+        {
+            eStatus = MB_EPORTERR;
+        }
     }
-    if( xMBPortTimersInit( ( USHORT ) usTimerT35_50us ) != TRUE )
-    {
-        eStatus = MB_EPORTERR;
-    }
-
     EXIT_CRITICAL_SECTION(  );
 
     return eStatus;
@@ -241,7 +242,7 @@ xMBRTUReceiveFSM( void )
          */
     case STATE_RX_IDLE:
         usRcvBufferPos = 0;
-        ( void )xMBPortSerialGetByte( ( CHAR * )&ucByte );
+        ( void )xMBPortSerialGetByte( ( CHAR * ) & ucByte );
         ucRTUBuf[usRcvBufferPos++] = ucByte;
         eRcvState = STATE_RX_RCV;
 
@@ -257,7 +258,7 @@ xMBRTUReceiveFSM( void )
     case STATE_RX_RCV:
         if( usRcvBufferPos < MB_SER_PDU_SIZE_MAX )
         {
-            ( void )xMBPortSerialGetByte( ( CHAR * )&ucByte );
+            ( void )xMBPortSerialGetByte( ( CHAR * ) & ucByte );
             ucRTUBuf[usRcvBufferPos++] = ucByte;
         }
         else
