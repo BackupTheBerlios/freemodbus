@@ -3,9 +3,11 @@
  Notes: Fixed bug in Read/Write Multiple Registers function where
    the registers addresses where calculated wrong.
    Fixed bug in RTU and ASCII with the resource allocation in case of
-   an error.
+   an error. 
+   Changed license to BSD style licsense.
 
  Detailed notes:
+   - OTHER (ALL): License is now BSD for protocol stack.
    - BUG (ALL): The registers address received in a Modbus frame
       must be converted to application addresses. The code for this
       conversion was missing and therefore has lead to error when
