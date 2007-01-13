@@ -1,4 +1,14 @@
 
+2007-01-13 (REL_1_1_2) Christian Walter <wolti@sil.at>:
+ Notes: Fixed typo with the defined defining the supported Modbus
+   functions.
+
+ Detailed notes:
+   - BUG (ALL): Modbus functions are compiled into the stack conditionally
+      by changing the MB_FUNC_XXX defines to either true(1) or false(0).
+      The defines for MB_FUNC_READ_HOLDING and MB_FUNC_WRITE_HOLDING
+      were wrong.
+
 2006-11-19 (REL_1_1_1) Christian Walter <wolti@sil.at>:
  Notes: Fixed bug in Read/Write Multiple Registers function where
    the registers addresses where calculated wrong.

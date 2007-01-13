@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mb.c,v 1.24 2006/12/07 22:10:34 wolti Exp $
+ * File: $Id: mb.c,v 1.25 2007/01/13 11:50:20 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -99,13 +99,13 @@ static xMBFunctionHandler xFuncHandlers[MB_FUNC_HANDLERS_MAX] = {
 #if MB_FUNC_READ_INPUT_ENABLED > 0
     {MB_FUNC_READ_INPUT_REGISTER, eMBFuncReadInputRegister},
 #endif
-#if MB_FUNC_WRITE_HOLDING_ENABLED > 0
+#if MB_FUNC_READ_HOLDING_ENABLED > 0
     {MB_FUNC_READ_HOLDING_REGISTER, eMBFuncReadHoldingRegister},
 #endif
 #if MB_FUNC_WRITE_MULTIPLE_HOLDING_ENABLED > 0
     {MB_FUNC_WRITE_MULTIPLE_REGISTERS, eMBFuncWriteMultipleHoldingRegister},
 #endif
-#if MB_FUNC_READ_HOLDING_ENABLED > 0
+#if MB_FUNC_WRITE_HOLDING_ENABLED > 0
     {MB_FUNC_WRITE_REGISTER, eMBFuncWriteHoldingRegister},
 #endif
 #if MB_FUNC_READWRITE_HOLDING_ENABLED > 0
