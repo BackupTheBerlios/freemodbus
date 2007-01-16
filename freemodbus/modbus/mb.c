@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mb.c,v 1.25 2007/01/13 11:50:20 wolti Exp $
+ * File: $Id: mb.c,v 1.26 2007/01/16 21:47:37 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -137,53 +137,56 @@ eMBInit( eMBMode eMode, UCHAR ucSlaveAddress, UCHAR ucPort, ULONG ulBaudRate, eM
     {
         eStatus = MB_EINVAL;
     }
-    ucMBAddress = ucSlaveAddress;
-
-    switch ( eMode )
+    else
     {
-#if MB_RTU_ENABLED > 0
-    case MB_RTU:
-        pvMBFrameStartCur = eMBRTUStart;
-        pvMBFrameStopCur = eMBRTUStop;
-        peMBFrameSendCur = eMBRTUSend;
-        peMBFrameReceiveCur = eMBRTUReceive;
-        pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBPortClose : NULL;
-        pxMBFrameCBByteReceived = xMBRTUReceiveFSM;
-        pxMBFrameCBTransmitterEmpty = xMBRTUTransmitFSM;
-        pxMBPortCBTimerExpired = xMBRTUTimerT35Expired;
+        ucMBAddress = ucSlaveAddress;
 
-        eStatus = eMBRTUInit( ucMBAddress, ucPort, ulBaudRate, eParity );
-        break;
+        switch ( eMode )
+        {
+#if MB_RTU_ENABLED > 0
+        case MB_RTU:
+            pvMBFrameStartCur = eMBRTUStart;
+            pvMBFrameStopCur = eMBRTUStop;
+            peMBFrameSendCur = eMBRTUSend;
+            peMBFrameReceiveCur = eMBRTUReceive;
+            pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBPortClose : NULL;
+            pxMBFrameCBByteReceived = xMBRTUReceiveFSM;
+            pxMBFrameCBTransmitterEmpty = xMBRTUTransmitFSM;
+            pxMBPortCBTimerExpired = xMBRTUTimerT35Expired;
+
+            eStatus = eMBRTUInit( ucMBAddress, ucPort, ulBaudRate, eParity );
+            break;
 #endif
 #if MB_ASCII_ENABLED > 0
-    case MB_ASCII:
-        pvMBFrameStartCur = eMBASCIIStart;
-        pvMBFrameStopCur = eMBASCIIStop;
-        peMBFrameSendCur = eMBASCIISend;
-        peMBFrameReceiveCur = eMBASCIIReceive;
-        pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBPortClose : NULL;
-        pxMBFrameCBByteReceived = xMBASCIIReceiveFSM;
-        pxMBFrameCBTransmitterEmpty = xMBASCIITransmitFSM;
-        pxMBPortCBTimerExpired = xMBASCIITimerT1SExpired;
+        case MB_ASCII:
+            pvMBFrameStartCur = eMBASCIIStart;
+            pvMBFrameStopCur = eMBASCIIStop;
+            peMBFrameSendCur = eMBASCIISend;
+            peMBFrameReceiveCur = eMBASCIIReceive;
+            pvMBFrameCloseCur = MB_PORT_HAS_CLOSE ? vMBPortClose : NULL;
+            pxMBFrameCBByteReceived = xMBASCIIReceiveFSM;
+            pxMBFrameCBTransmitterEmpty = xMBASCIITransmitFSM;
+            pxMBPortCBTimerExpired = xMBASCIITimerT1SExpired;
 
-        eStatus = eMBASCIIInit( ucMBAddress, ucPort, ulBaudRate, eParity );
-        break;
+            eStatus = eMBASCIIInit( ucMBAddress, ucPort, ulBaudRate, eParity );
+            break;
 #endif
-    default:
-        eStatus = MB_EINVAL;
-    }
-
-    if( eStatus == MB_ENOERR )
-    {
-        if( !xMBPortEventInit(  ) )
-        {
-            /* port dependent event module initalization failed. */
-            eStatus = MB_EPORTERR;
+        default:
+            eStatus = MB_EINVAL;
         }
-        else
+
+        if( eStatus == MB_ENOERR )
         {
-            eMBCurrentMode = eMode;
-            eMBState = STATE_DISABLED;
+            if( !xMBPortEventInit(  ) )
+            {
+                /* port dependent event module initalization failed. */
+                eStatus = MB_EPORTERR;
+            }
+            else
+            {
+                eMBCurrentMode = eMode;
+                eMBState = STATE_DISABLED;
+            }
         }
     }
     return eStatus;
