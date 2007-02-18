@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mb.c,v 1.26 2007/01/16 21:47:37 wolti Exp $
+ * File: $Id: mb.c,v 1.27 2007/02/18 23:45:41 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -393,7 +393,7 @@ eMBPoll( void )
                 {
                     /* An exception occured. Build an error frame. */
                     usLength = 0;
-                    ucMBFrame[usLength++] = ucFunctionCode | MB_FUNC_ERROR;
+                    ucMBFrame[usLength++] = ( UCHAR )( ucFunctionCode | MB_FUNC_ERROR );
                     ucMBFrame[usLength++] = eException;
                 }
                 eStatus = peMBFrameSendCur( ucMBAddress, ucMBFrame, usLength );
