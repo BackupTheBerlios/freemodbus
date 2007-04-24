@@ -16,7 +16,7 @@
   * License along with this library; if not, write to the Free Software
   * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
   *
-  * File: $Id: main.dox,v 1.13 2007/02/19 01:27:30 wolti Exp $
+  * File: $Id: main.dox,v 1.14 2007/04/24 23:43:31 wolti Exp $
   */
 
 /*! \mainpage FreeModbus
@@ -31,7 +31,8 @@ FreeModbus is a Modbus ASCII/RTU and Modbus TCP implementation for embedded syst
 
 \par ARM devices:
 - STR71X with FreeRTOS/GCC. See STR71X/simple2.c for an example.
-- STR71TCP with FreeRTOS/lwIP/GCC. This port includes FreeRTOS, lwIP and a fully working PPP stack. The lwIP, PPP and FreeRTOS part is generic and therefore can be used for other ports ( or other projects ). 
+- STR71TCP with FreeRTOS/lwIP/GCC. This port includes FreeRTOS, lwIP and a fully working PPP stack. The lwIP, PPP and FreeRTOS part is generic and therefore can be used for other ports ( or other projects ).
+- LPC214X with Keil. See LPC214X/demo.c for an example. This port uses the Keil ARM Compiler 2.41.  
 
 \par AVR devices:
 - ATMega8/16/32/128/168/169 with WinAVR. See AVR/demo.c for an example.
@@ -45,6 +46,9 @@ FreeModbus is a Modbus ASCII/RTU and Modbus TCP implementation for embedded syst
 \par MSP430 devices
 - MSP430F169 with Rowley Crossworks. See MSP430/demo.c for an example.
 - MSP430F169 with GCC. See MSP430/demo.c for an example.
+
+\par Z8Encore devices
+- Z8F6422 and Z8F1622 port. See Z8ENCORE/demo.c for an example. The port uses ZDS II - Z8 Encore! 4.10.1 as development environment.
 
 \par Win32:
 - A Win32 Modbus RTU/ASCII Port.
