@@ -1,0 +1,4 @@
+
+2007-06-20 (REL_1_0_0) Christian Walter <wolti@sil.at>:
+ Notes: Initial import of MODBUS master code base for joined development 
+   work.
