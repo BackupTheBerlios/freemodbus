@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbascii.c,v 1.15 2007/02/18 23:46:48 wolti Exp $
+ * File: $Id: mbascii.c,v 1.16 2010/06/05 09:59:51 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -273,7 +273,8 @@ xMBASCIIReceiveFSM( void )
                 break;
 
             case BYTE_LOW_NIBBLE:
-                ucASCIIBuf[usRcvBufferPos++] |= ucResult;
+                ucASCIIBuf[usRcvBufferPos] |= ucResult;
+                usRcvBufferPos++;
                 eBytePos = BYTE_HIGH_NIBBLE;
                 break;
             }
