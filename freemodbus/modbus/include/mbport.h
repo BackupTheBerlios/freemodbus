@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbport.h,v 1.18 2010/06/05 09:59:51 wolti Exp $
+ * File: $Id: mbport.h,v 1.19 2010/06/06 13:54:40 wolti Exp $
  */
 
 #ifndef _MB_PORT_H
@@ -89,6 +89,8 @@ void            xMBPortTimersClose( void );
 void            vMBPortTimersEnable( void );
 
 void            vMBPortTimersDisable( void );
+
+void            vMBPortTimersDelay( USHORT usTimeOutMS );
 
 /* ----------------------- Callback for the protocol stack ------------------*/
 
