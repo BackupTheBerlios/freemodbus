@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: port.h,v 1.1 2010/06/06 13:07:20 wolti Exp $
+ * File: $Id: port.h,v 1.2 2010/06/06 13:46:42 wolti Exp $
  */
 
 #ifndef _PORT_H
@@ -73,10 +73,10 @@ typedef long    LONG;
 #define MB_ASCII_TIMEOUT_WAIT_BEFORE_SEND_MS    2
 
 /* ----------------------- Prototypes ---------------------------------------*/
-void vMBPortSetWithinException( BOOL bInException );
-BOOL bMBPortIsWithinException( void );
+void            vMBPortSetWithinException( BOOL bInException );
+BOOL            bMBPortIsWithinException( void );
 
-void    vMBPortEnterCritical( void );
-void    vMBPortExitCritical( void );
+void            vMBPortEnterCritical( void );
+void            vMBPortExitCritical( void );
 
 #endif

@@ -25,18 +25,19 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: porttimer.c,v 1.1 2010/06/05 09:57:48 wolti Exp $
+ * File: $Id: porttimer.c,v 1.2 2010/06/06 13:46:42 wolti Exp $
  */
 
-/* ----------------------- Platform includes --------------------------------*/
-#include "port.h"
-
+/* ----------------------- System includes ----------------------------------*/
 
 /* ----------------------- Modbus includes ----------------------------------*/
+#include "port.h"
 #include "mb.h"
 #include "mbport.h"
 
 /* ----------------------- Defines ------------------------------------------*/
+
+
 #define MB_TIMER_DEBUG                      ( 0 )
 #define MB_TIMER_PRESCALER                  ( 128UL )
 #define MB_TIMER_TICKS                      ( BOARD_MCK / MB_TIMER_PRESCALER )
@@ -59,6 +60,10 @@
 #define TIMER_PIN { 1 << 6, PIOA, ID_PIOA, PIO_OUTPUT_1, PIO_DEFAULT }
 #endif
 
+#ifndef SYSTICK_COUNTFLAG
+/* missing in CMSIS */
+#define SYSTICK_COUNTFLAG                   ( 16 )             
+#endif
 /* ----------------------- Static variables ---------------------------------*/
 #if MB_TIMER_DEBUG == 1
 const static Pin xTimerDebugPins[] = { TIMER_PIN };
@@ -109,6 +114,22 @@ vMBPortTimersDisable(  )
 #if MB_TIMER_DEBUG == 1
     PIO_Clear( &xTimerDebugPins[0] );
 #endif   
+}
+
+void
+vMBPortTimersDelay( USHORT usTimeOutMS )
+{
+
+    SysTick->CTRL = 0;
+    SysTick->LOAD = BOARD_MCK / 1000;  
+    SysTick->VAL = 0; /* Clear COUNTFLAG */
+    SysTick->CTRL = ( 1 << SYSTICK_CLKSOURCE) | ( 1<<SYSTICK_ENABLE);   
+    while( usTimeOutMS )
+    {
+        while( 0 == ( SysTick->CTRL & ( 1 << SYSTICK_COUNTFLAG ) ) );
+        SysTick->VAL = 0;
+        usTimeOutMS--;
+    }
 }
 
 void

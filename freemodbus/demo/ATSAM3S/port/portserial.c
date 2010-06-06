@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: portserial.c,v 1.1 2010/06/05 09:57:48 wolti Exp $
+ * File: $Id: portserial.c,v 1.2 2010/06/06 13:46:42 wolti Exp $
  */
 
 /* ----------------------- Platform includes --------------------------------*/
@@ -121,6 +121,7 @@ vMBPortSerialEnable( BOOL xRxEnable, BOOL xTxEnable )
         }
         USART_SetTransmitterEnabled( xUSARTHWMappings[ucUsedPort].pUsart, 1 );
         USART_EnableIt( xUSARTHWMappings[ucUsedPort].pUsart, US_IER_TXRDY );
+        USART_DisableIt( xUSARTHWMappings[ucUsedPort].pUsart, US_IER_TXEMPTY );
     }
     else
     {
@@ -228,8 +229,8 @@ xMBPortSerialGetByte( CHAR * pucByte )
 void
 vUSARTHandler( void )
 {
-    uint32_t        uiCSR = 2;
-    uint32_t        uiIMR = 3;
+    uint32_t        uiCSR;
+    uint32_t        uiIMR;
     uiCSR = xUSARTHWMappings[ucUsedPort].pUsart->US_CSR;
     uiIMR = xUSARTHWMappings[ucUsedPort].pUsart->US_IMR;
     uint32_t        uiCSRMasked = uiCSR & uiIMR;

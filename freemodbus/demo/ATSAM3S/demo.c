@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: demo.c,v 1.1 2010/06/05 09:57:46 wolti Exp $
+ * File: $Id: demo.c,v 1.2 2010/06/06 13:46:42 wolti Exp $
  */
 
 /* ----------------------- AT91SAM3S includes -------------------------------*/
@@ -37,8 +37,11 @@
 #include "mbport.h"
 
 /* ----------------------- Defines ------------------------------------------*/
-#define REG_INPUT_START 1000
-#define REG_INPUT_NREGS 4
+#define REG_INPUT_START                 ( 1000 )
+#define REG_INPUT_NREGS                 ( 64 )
+
+#define REG_HOLDING_START               ( 1 )
+#define REG_HOLDING_NREGS               ( 32 )
 
 /* ----------------------- Static functions ---------------------------------*/
 static void _SetupHardware( void );
@@ -46,6 +49,8 @@ static void _SetupHardware( void );
 /* ----------------------- Static variables ---------------------------------*/
 static USHORT   usRegInputStart = REG_INPUT_START;
 static USHORT   usRegInputBuf[REG_INPUT_NREGS];
+static USHORT   usRegHoldingStart = REG_HOLDING_START;
+static USHORT   usRegHoldingBuf[REG_HOLDING_NREGS];
 
 /* ----------------------- Start implementation -----------------------------*/
 int
@@ -56,19 +61,39 @@ main( void )
     const UCHAR     ucSlaveID[] = { 0xAA, 0xBB, 0xCC };
     eMBErrorCode    eStatus;
 
-    eStatus = eMBInit( MB_RTU, 0x0A, 1, 38400, MB_PAR_EVEN );
-    eStatus = eMBSetSlaveID( 0x34, TRUE, ucSlaveID, 3 );
-
-    /* Enable the Modbus Protocol Stack. */
-    eStatus = eMBEnable(  );
-
     for( ;; )
     {
-        ( void )eMBPoll(  );
-
-        /* Here we simply count the number of poll cycles. */
-        usRegInputBuf[0]++;
-    }
+        if( MB_ENOERR != ( eStatus = eMBInit( MB_RTU, 0x0A, 1, 38400, MB_PAR_EVEN ) ) )
+        {
+            /* Can not initialize. Add error handling code here. */
+        }
+        else
+        {      
+            if( MB_ENOERR != ( eStatus = eMBSetSlaveID( 0x34, TRUE, ucSlaveID, 3 ) ) )
+            {
+                /* Can not set slave id. Check arguments */
+            }
+            else if( MB_ENOERR != ( eStatus = eMBEnable(  ) ) )
+            {
+                /* Enable failed. */
+            }
+            else
+            {      
+                usRegHoldingBuf[0] = 1;
+                do
+                {
+                    ( void )eMBPoll(  );
+            
+                    /* Here we simply count the number of poll cycles. */
+                    usRegInputBuf[0]++;
+                }
+                while( usRegHoldingBuf[0] );
+                ( void )eMBDisable(  );
+                ( void )eMBClose(  );                
+            }
+        }
+    }    
+    return 1;
 }
 
 void _SetupHardware( void )
@@ -111,12 +136,42 @@ eMBRegInputCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs )
 }
 
 eMBErrorCode
-eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs,
-                 eMBRegisterMode eMode )
+eMBRegHoldingCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNRegs, eMBRegisterMode eMode )
 {
-    return MB_ENOREG;
-}
+    eMBErrorCode    eStatus = MB_ENOERR;
+    int             iRegIndex;
 
+    if( ( usAddress >= REG_HOLDING_START ) && ( usAddress + usNRegs <= REG_HOLDING_START + REG_HOLDING_NREGS ) )
+    {
+        iRegIndex = ( int )( usAddress - usRegHoldingStart );
+        switch ( eMode )
+        {
+        case MB_REG_READ:
+            while( usNRegs > 0 )
+            {
+                *pucRegBuffer++ = ( unsigned char )( usRegHoldingBuf[iRegIndex] >> 8 );
+                *pucRegBuffer++ = ( unsigned char )( usRegHoldingBuf[iRegIndex] & 0xFF );
+                iRegIndex++;
+                usNRegs--;
+            }
+            break;
+
+        case MB_REG_WRITE:
+            while( usNRegs > 0 )
+            {
+                usRegHoldingBuf[iRegIndex] = *pucRegBuffer++ << 8;
+                usRegHoldingBuf[iRegIndex] |= *pucRegBuffer++;
+                iRegIndex++;
+                usNRegs--;
+            }
+        }
+    }
+    else
+    {
+        eStatus = MB_ENOREG;
+    }
+    return eStatus;
+}
 
 eMBErrorCode
 eMBRegCoilsCB( UCHAR * pucRegBuffer, USHORT usAddress, USHORT usNCoils,
