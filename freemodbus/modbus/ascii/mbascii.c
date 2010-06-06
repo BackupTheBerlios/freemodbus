@@ -25,7 +25,7 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
- * File: $Id: mbascii.c,v 1.16 2010/06/05 09:59:51 wolti Exp $
+ * File: $Id: mbascii.c,v 1.17 2010/06/06 13:47:07 wolti Exp $
  */
 
 /* ----------------------- System includes ----------------------------------*/
@@ -188,7 +188,7 @@ eMBASCIISend( UCHAR ucSlaveAddress, const UCHAR * pucFrame, USHORT usLength )
     UCHAR           usLRC;
 
     ENTER_CRITICAL_SECTION(  );
-    /* Check if the receiver is still in idle state. If not we where to
+    /* Check if the receiver is still in idle state. If not we where too
      * slow with processing the received frame and the master sent another
      * frame on the network. We have to abort sending the frame.
      */
